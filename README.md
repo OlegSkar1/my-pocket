@@ -39,6 +39,9 @@ my-pocket/
 - shadcn/ui: компоненты добавляются через `npx shadcn@latest add ...`
 - Nest.js: 11.x
 - Prisma: 6.x
+- ESLint: 9.x (flat config) — конфиги уже добавлены, нужны пакеты:
+  - в корне (devDependencies): `eslint`, `@eslint/js`, `typescript-eslint`, `@eslint/eslintrc`
+  - во фронтенде: `eslint-config-next`
 
 ## Команды (после установки зависимостей)
 
