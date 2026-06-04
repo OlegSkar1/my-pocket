@@ -1,0 +1,26 @@
+# Зависимости
+node_modules/
+
+# Сборки
+dist/
+build/
+.next/
+out/
+
+# Окружение
+.env
+.env.local
+.env.*.local
+
+# Prisma
+**/prisma/migrations/dev.db*
+
+# Логи
+*.log
+npm-debug.log*
+
+# Редакторы / ОС
+.DS_Store
+.idea/
+.vscode/
+*.tsbuildinfo
