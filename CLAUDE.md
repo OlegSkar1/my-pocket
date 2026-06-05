@@ -4,20 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Статус проекта
 
-Это **скелет монорепозитория без установленных зависимостей**. В `package.json` всех воркспейсов поля `dependencies`/`devDependencies` пустые, версии библиотек ещё не зафиксированы. Команды `npm run dev:*`, `lint`, `build` не заработают, пока не выполнен `npm install` и не добавлены зависимости (Next.js, Nest.js, Prisma и т.д.). Целевые версии указаны в `README.md` (Node 20 LTS, Next 16, Tailwind 4, Nest 11, Prisma 6).
+Зависимости **установлены** (`npm install` выполнен); `npm run lint` и `npm run build` проходят во всех воркспейсах. Установленные версии: Node 20 LTS (целевая среда, локально может быть новее), Next 16 + React 19, Tailwind 4, Nest 11, Prisma 6, ESLint 9 (flat config), TypeScript 5.9. Точный перечень — в `README.md` и `package.json` воркспейсов.
+
+Для запуска бэкенда нужна БД: `npm run db:up`, заполнить `apps/backend/.env` (`DATABASE_URL`), затем `prisma generate` + миграция (см. ниже).
 
 ## Архитектура
 
 npm workspaces монорепозиторий — трекер расходов. Корневой `package.json` объявляет воркспейсы `apps/*` и `packages/*`; команды запускаются из корня и делегируются через `--workspace`/`--workspaces`.
 
-- `apps/frontend` (`@my-pocket/frontend`) — Next.js (App Router, TypeScript), Tailwind v4 + shadcn/ui.
+- `apps/frontend` (`@my-pocket/frontend`) — Next.js (App Router, TypeScript), Tailwind v4 + shadcn/ui. Tailwind подключён через `@tailwindcss/postcss` в `postcss.config.mjs`; CSS-first конфигурация в `src/app/globals.css` (`@import "tailwindcss"`, дизайн-токены в `@theme`). `globals.css` импортируется в `src/app/layout.tsx`.
 - `apps/backend` (`@my-pocket/backend`) — Nest.js + Prisma. Слушает порт из `process.env.PORT` (по умолчанию **3001**). Prisma-схема в `apps/backend/prisma/schema.prisma`, клиент генерируется здесь же.
 - `packages/shared-types` (`@my-pocket/shared-types`) — общие TS-типы и контракты API между фронтом и бэком. Импортируется из исходников напрямую (`main`/`types` → `./src/index.ts`, без сборки). **Типы API должны зеркалить Prisma-модели**: `Decimal` в Prisma представляется как `string` в TS-типах (см. `Expense.amount`).
 - `packages/config` — общие базовые конфиги.
 
 Базовый `tsconfig.base.json` в корне задаёт строгий режим (`strict`, `noUnusedLocals`, `noUnusedParameters`), `target ES2022`, `moduleResolution: Bundler`. Воркспейсы наследуют его через свои `tsconfig.json`.
 
-**Линтинг (ESLint 9, flat config).** Общий базовый конфиг — `packages/config/eslint.base.mjs` (экспортируется как `@my-pocket/config/eslint.base.mjs`). Каждое приложение имеет свой `eslint.config.mjs`, который импортирует базу и добавляет специфику: бэкенд отключает шумные для Nest правила и ставит `sourceType: commonjs`; фронтенд добавляет `next/core-web-vitals` + `next/typescript` через `FlatCompat`. `next lint` не используется (удалён в Next 16) — оба приложения линтятся прямым вызовом `eslint .`. Нужные пакеты пока не установлены (см. список в `README.md`).
+**Линтинг (ESLint 9, flat config).** Общий базовый конфиг — `packages/config/eslint.base.mjs` (экспортируется как `@my-pocket/config/eslint.base.mjs`), тянет `@eslint/js` и `typescript-eslint` (они в `dependencies` пакета `@my-pocket/config`). Каждое приложение имеет свой `eslint.config.mjs`, который импортирует базу и добавляет специфику: бэкенд отключает шумные для Nest правила и ставит `sourceType: commonjs`; фронтенд подключает нативные flat-конфиги `eslint-config-next/core-web-vitals` и `eslint-config-next/typescript` (в v16 это готовые flat-массивы — `FlatCompat` не используется). `next lint` не используется (удалён в Next 16) — оба приложения линтятся прямым вызовом `eslint .`.
 
 ## Команды
 

@@ -19,8 +19,12 @@ out/
 *.log
 npm-debug.log*
 
+# Next.js (генерируется)
+next-env.d.ts
+
 # Редакторы / ОС
 .DS_Store
 .idea/
 .vscode/
 *.tsbuildinfo
+*.stackdump

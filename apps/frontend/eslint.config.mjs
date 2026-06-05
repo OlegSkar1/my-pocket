@@ -1,15 +1,13 @@
 // ESLint для фронтенда (Next.js). Наследует общий базовый конфиг
-// и добавляет правила Next (core-web-vitals) через FlatCompat.
-import { dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { FlatCompat } from "@eslint/eslintrc";
+// и добавляет нативные flat-конфиги Next (eslint-config-next v16+).
 import baseConfig from "@my-pocket/config/eslint.base.mjs";
+import nextCoreWebVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-const compat = new FlatCompat({
-  baseDirectory: dirname(fileURLToPath(import.meta.url)),
-});
-
-export default [
+const config = [
   ...baseConfig,
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
 ];
+
+export default config;
