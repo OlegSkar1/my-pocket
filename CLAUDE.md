@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## О проекте
+
+**my-pocket** — трекер личных расходов: записывать траты, относить их по категориям и видеть, куда уходят деньги. Учебный пет-проект на современном клиент-серверном стеке (Next.js + Nest.js + Prisma/PostgreSQL).
+
 ## Статус проекта
 
 Зависимости **установлены** (`npm install` выполнен); `npm run lint` и `npm run build` проходят во всех воркспейсах. Установленные версии: Node 20 LTS (целевая среда, локально может быть новее), Next 16 + React 19, Tailwind 4, Nest 11, Prisma 6, ESLint 9 (flat config), TypeScript 5.9. Точный перечень — в `README.md` и `package.json` воркспейсов.
