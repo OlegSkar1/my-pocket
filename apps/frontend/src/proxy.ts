@@ -1,7 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-
-const TOKEN_COOKIE = "access_token";
-const AUTH_PATHS = ["/login", "/register"];
+import { AUTH_PATHS, TOKEN_COOKIE } from "@/shared/config";
 
 export function proxy(request: NextRequest) {
   const token = request.cookies.get(TOKEN_COOKIE)?.value;
