@@ -59,4 +59,34 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/my_pocket?schema=pub
 2. `npm run db:up`
 3. Заполнить `apps/backend/.env` (`DATABASE_URL`)
 4. `npm run prisma:generate` + первая миграция `npm run prisma:migrate` (в `apps/backend`)
-5. Запустить dev-серверы
+5. Создать `apps/frontend/.env` из `.env.example` (`NEXT_PUBLIC_API_URL=http://localhost:3001`)
+6. Запустить dev-серверы
+
+## Фронт-архитектура (Feature-Sliced Design)
+
+Фронтенд в `apps/frontend/src` организован по **Feature-Sliced Design**. Правило импортов: каждый слой импортирует только из слоёв **строго ниже**. Импорты — только через публичный API среза (`index.ts`), не вглубь в файлы.
+
+```
+app → views → features → entities → shared
+```
+
+### Слои
+
+| Слой | Путь | Назначение |
+|---|---|---|
+| **app** | `src/app/` | Next.js App Router + провайдеры (`providers.tsx`), глобальные стили |
+| **views** | `src/views/` | Компоновка страниц (аналог FSD `pages`; переименован — Next резервирует `pages/`) |
+| **features** | `src/features/` | Бизнес-фичи: `auth/login`, `auth/register` |
+| **entities** | `src/entities/` | Бизнес-сущности: `session` (zustand-стор + типы) |
+| **shared** | `src/shared/` | Переиспользуемое без бизнес-специфики |
+
+### Сегменты `shared`
+
+- `shared/api` — `apiClient` (fetch-обёртка: Bearer-токен, парсинг ошибок Nest, обработка 401)
+- `shared/config` — `env` (переменные окружения), `ROUTES` (константы путей)
+- `shared/lib` — `cn` (clsx + tailwind-merge), `getToken/setToken/removeToken` (js-cookie)
+- `shared/ui` — shadcn/ui-компоненты (Button, Input, Label, Card, Form)
+
+### Защита роутов
+
+`apps/frontend/middleware.ts` — Edge middleware: читает cookie `access_token`. Неавторизованный на приватном роуте → редирект `/login`; авторизованный на `/login` или `/register` → редирект `/`.

@@ -1,21 +1,80 @@
 @import "tailwindcss";
 
-/* Дизайн-токены (Tailwind v4, CSS-first конфигурация).
-   Доступны как утилиты, напр. bg-background / text-foreground. */
+/* Дизайн-токены (Tailwind v4, CSS-first).
+   Доступны как утилиты: bg-background, text-foreground, bg-primary и т.д. */
 @theme {
-  --color-background: #ffffff;
-  --color-foreground: #171717;
+  /* Базовые цвета */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+
+  /* Карточка */
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.145 0 0);
+
+  /* Основной акцент */
+  --color-primary: oklch(0.205 0 0);
+  --color-primary-foreground: oklch(0.985 0 0);
+
+  /* Вторичный */
+  --color-secondary: oklch(0.97 0 0);
+  --color-secondary-foreground: oklch(0.205 0 0);
+
+  /* Приглушённый */
+  --color-muted: oklch(0.97 0 0);
+  --color-muted-foreground: oklch(0.556 0 0);
+
+  /* Акцент hover */
+  --color-accent: oklch(0.97 0 0);
+  --color-accent-foreground: oklch(0.205 0 0);
+
+  /* Деструктивный */
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.985 0 0);
+
+  /* Граница и инпут */
+  --color-border: oklch(0.922 0 0);
+  --color-input: oklch(0.922 0 0);
+  --color-ring: oklch(0.708 0 0);
+
+  /* Радиусы */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
 }
 
-/* Тёмная тема по системной настройке. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0a0a0a;
-    --color-foreground: #ededed;
+  @theme {
+    --color-background: oklch(0.075 0 0);
+    --color-foreground: oklch(0.985 0 0);
+
+    --color-card: oklch(0.075 0 0);
+    --color-card-foreground: oklch(0.985 0 0);
+
+    --color-primary: oklch(0.985 0 0);
+    --color-primary-foreground: oklch(0.205 0 0);
+
+    --color-secondary: oklch(0.17 0 0);
+    --color-secondary-foreground: oklch(0.985 0 0);
+
+    --color-muted: oklch(0.17 0 0);
+    --color-muted-foreground: oklch(0.708 0 0);
+
+    --color-accent: oklch(0.17 0 0);
+    --color-accent-foreground: oklch(0.985 0 0);
+
+    --color-destructive: oklch(0.396 0.141 25.723);
+    --color-destructive-foreground: oklch(0.985 0 0);
+
+    --color-border: oklch(0.17 0 0);
+    --color-input: oklch(0.17 0 0);
+    --color-ring: oklch(0.556 0 0);
   }
 }
 
 @layer base {
+  * {
+    border-color: var(--color-border);
+  }
   body {
     background: var(--color-background);
     color: var(--color-foreground);
