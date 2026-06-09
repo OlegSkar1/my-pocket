@@ -189,3 +189,63 @@ export const CurrentUser = createParamDecorator(
    - `PATCH`/`DELETE /categories/:id` чужого/несуществующего id → 404.
    - Повторный `POST` с тем же `name` → 409 (Conflict).
    - Удаление категории, на которую ссылаются расходы → у этих `Expense` поле `categoryId` становится `null` (поведение `onDelete: SetNull`), сами расходы остаются.
+
+## Чек-лист реализации
+
+### Prisma — схема и миграция
+- [x] Добавить модель `Category` в `apps/backend/prisma/schema.prisma`
+- [x] Добавить `categories Category[]` в модель `User`
+- [x] Заменить `category String?` на `categoryId String?` + relation в модели `Expense`
+- [x] Выполнить `npm run prisma:migrate` в `apps/backend` — миграция проходит без ошибок
+
+### Общие типы (`packages/shared-types/src/index.ts`)
+- [x] Добавить интерфейс `Category`
+- [x] Добавить интерфейс `CreateCategoryDto`
+- [x] Добавить интерфейс `UpdateCategoryDto`
+- [x] В `Expense`: заменить `category: string | null` на `categoryId: string | null`
+- [x] В `CreateExpenseDto`: заменить `category?: string` на `categoryId?: string`
+
+### Декоратор `@CurrentUser`
+- [x] Создать `apps/backend/src/auth/decorators/current-user.decorator.ts`
+
+### DTO
+- [x] Создать `apps/backend/src/categories/dto/create-category.dto.ts`
+- [x] Создать `apps/backend/src/categories/dto/update-category.dto.ts` _(исправлено: добавлен `@IsNotEmpty()` на поле `name`)_
+
+### Repository
+- [x] Создать `apps/backend/src/categories/categories.repository.ts` с методами `create`, `findManyByUser`, `findByIdForUser`, `update`, `delete`
+
+### Service
+- [x] Создать `apps/backend/src/categories/categories.service.ts` с `NotFoundException` при not found и `ConflictException` при P2002
+
+### CQRS — команды
+- [x] Создать `commands/create-category.command.ts`
+- [x] Создать `commands/update-category.command.ts`
+- [x] Создать `commands/delete-category.command.ts`
+- [x] Создать `commands/handlers/create-category.handler.ts`
+- [x] Создать `commands/handlers/update-category.handler.ts`
+- [x] Создать `commands/handlers/delete-category.handler.ts`
+
+### CQRS — запросы
+- [x] Создать `queries/get-categories.query.ts`
+- [x] Создать `queries/get-category-by-id.query.ts`
+- [x] Создать `queries/handlers/get-categories.handler.ts`
+- [x] Создать `queries/handlers/get-category-by-id.handler.ts`
+
+### Controller
+- [x] Создать `apps/backend/src/categories/categories.controller.ts` (5 эндпоинтов, `JwtAuthGuard`, `@CurrentUser`)
+
+### Module
+- [x] Создать `apps/backend/src/categories/categories.module.ts` (импорт `CqrsModule`, регистрация репозитория, сервиса, хендлеров)
+- [x] Добавить `CategoriesModule` в `imports` в `apps/backend/src/app.module.ts`
+
+### Финальная проверка
+- [x] `npm run lint` — без ошибок во всех воркспейсах
+- [x] `npm run build` — без ошибок во всех воркспейсах
+- [x] `POST /categories` с валидным телом → 201
+- [x] `POST /categories` с невалидным `color` → 400
+- [x] Запрос без токена → 401
+- [x] `GET /categories` → только свои категории
+- [x] `PATCH`/`DELETE` чужого id → 404
+- [x] Повторный `POST` с тем же `name` → 409
+- [x] Удаление категории с расходами → расходы остаются, `categoryId` = `null`
