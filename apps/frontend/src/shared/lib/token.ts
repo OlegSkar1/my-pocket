@@ -12,3 +12,16 @@ export const setToken = (token: string): void => {
 export const removeToken = (): void => {
   Cookies.remove(TOKEN_KEY);
 };
+
+// Возвращает true если токен существует, но уже истёк.
+// Если токена нет — возвращает false (proxy.ts обрабатывает этот случай сам).
+export const isTokenExpired = (): boolean => {
+  const token = getToken();
+  if (!token) return false;
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1])) as { exp?: number };
+    return typeof payload.exp === "number" && payload.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+};

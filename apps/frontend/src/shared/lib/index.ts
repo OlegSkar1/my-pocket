@@ -1,2 +1,2 @@
 export { cn } from "./cn";
-export { getToken, setToken, removeToken } from "./token";
+export { getToken, setToken, removeToken, isTokenExpired } from "./token";
