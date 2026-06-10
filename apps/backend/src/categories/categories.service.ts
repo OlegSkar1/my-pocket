@@ -47,6 +47,16 @@ export class CategoriesService {
 
   async delete(id: string, userId: string): Promise<void> {
     await this.findByIdForUser(id, userId);
-    await this.repo.delete(id, userId);
+    try {
+      await this.repo.delete(id, userId);
+    } catch (err) {
+      // P2003 — нарушение внешнего ключа: есть связанные транзакции (onDelete: Restrict)
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2003") {
+        throw new ConflictException(
+          "Нельзя удалить категорию, пока есть связанные транзакции",
+        );
+      }
+      throw err;
+    }
   }
 }

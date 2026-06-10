@@ -69,3 +69,54 @@ export interface CreateExpenseDto {
   categoryId?: string;
   spentAt?: string;
 }
+
+// --- Transactions ---
+
+export type TransactionType = "INCOME" | "EXPENSE";
+
+export interface Transaction {
+  id: string;
+  amount: string; // Decimal → string
+  type: TransactionType;
+  description: string | null;
+  date: string; // ISO
+  categoryId: string;
+  userId: string;
+  createdAt: string;
+}
+
+export interface CreateTransactionDto {
+  amount: string;
+  type: TransactionType;
+  description?: string;
+  date: string;
+  categoryId: string;
+}
+
+export interface UpdateTransactionDto {
+  amount?: string;
+  type?: TransactionType;
+  description?: string;
+  date?: string;
+  categoryId?: string;
+}
+
+export interface TransactionsQuery {
+  dateFrom?: string;
+  dateTo?: string;
+  type?: TransactionType;
+  categoryId?: string;
+}
+
+export interface CategorySummary {
+  categoryId: string;
+  totalIncome: string;
+  totalExpense: string;
+}
+
+export interface TransactionsSummary {
+  totalIncome: string;
+  totalExpense: string;
+  balance: string;
+  byCategory: CategorySummary[];
+}
