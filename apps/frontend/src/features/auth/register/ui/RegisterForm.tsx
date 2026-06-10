@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Link from "next/link";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui/button";
@@ -21,7 +21,7 @@ export function RegisterForm() {
   const { mutate, isPending, error } = useRegister();
 
   const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
+    resolver: standardSchemaResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
 
@@ -87,7 +87,9 @@ export function RegisterForm() {
         />
 
         {error && (
-          <p className="text-sm font-medium text-destructive">{error.message}</p>
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error.message}
+          </div>
         )}
 
         <Button type="submit" className="w-full" disabled={isPending}>

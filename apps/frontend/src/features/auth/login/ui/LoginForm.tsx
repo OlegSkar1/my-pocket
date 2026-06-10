@@ -1,11 +1,12 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import Link from "next/link";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Checkbox } from "@/shared/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -21,8 +22,8 @@ export function LoginForm() {
   const { mutate, isPending, error } = useLogin();
 
   const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
+    resolver: standardSchemaResolver(loginSchema),
+    defaultValues: { email: "", password: "", agreement: false },
   });
 
   const onSubmit = (values: LoginFormValues) => mutate(values);
@@ -68,8 +69,42 @@ export function LoginForm() {
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="agreement"
+          render={({ field }) => (
+            <FormItem>
+              <div className="flex items-start gap-2">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                    id="agreement"
+                  />
+                </FormControl>
+                <FormLabel
+                  htmlFor="agreement"
+                  className="cursor-pointer text-sm font-normal leading-snug"
+                >
+                  Я принимаю{" "}
+                  <Link
+                    href="/terms"
+                    className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
+                  >
+                    пользовательское соглашение
+                  </Link>{" "}
+                  и даю согласие на обработку персональных данных
+                </FormLabel>
+              </div>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         {error && (
-          <p className="text-sm font-medium text-destructive">{error.message}</p>
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+            {error.message}
+          </div>
         )}
 
         <Button type="submit" className="w-full" disabled={isPending}>

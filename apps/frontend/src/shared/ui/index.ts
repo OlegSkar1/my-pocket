@@ -11,6 +11,7 @@ export {
   CardContent,
   CardFooter,
 } from "./card";
+export { Checkbox } from "./checkbox";
 export {
   Form,
   FormControl,

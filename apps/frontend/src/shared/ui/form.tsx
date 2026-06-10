@@ -9,6 +9,7 @@ import {
   type FieldPath,
   type FieldValues,
 } from "react-hook-form";
+import { Slot } from "@radix-ui/react-slot";
 import { Label } from "@/shared/ui/label";
 import { cn } from "@/shared/lib";
 
@@ -97,13 +98,13 @@ const FormLabel = React.forwardRef<
 FormLabel.displayName = "FormLabel";
 
 const FormControl = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ElementRef<typeof Slot>,
+  React.ComponentPropsWithoutRef<typeof Slot>
 >(({ ...props }, ref) => {
   const { error, formItemId, formDescriptionId, formMessageId } =
     useFormField();
   return (
-    <div
+    <Slot
       ref={ref}
       id={formItemId}
       aria-describedby={
