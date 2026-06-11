@@ -18,5 +18,9 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Пропускаем служебные пути Next и статические файлы (картинки, шрифты и т.п.),
+  // иначе middleware редиректит, например, /logo.png на /login.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|woff2?|ttf)$).*)",
+  ],
 };

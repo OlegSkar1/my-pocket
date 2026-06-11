@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { Wallet } from "lucide-react";
 import { cn } from "@/shared/lib";
 
@@ -17,6 +18,31 @@ export function Logo({ withText = true, className }: LogoProps) {
           my-pocket
         </span>
       )}
+    </span>
+  );
+}
+
+// Полноценный логотип-изображение с тег-лайном. Светлая/тёмная версии
+// переключаются по классу .dark (ставится анти-FOUC скриптом до отрисовки).
+export function LogoImage({ className }: { className?: string }) {
+  return (
+    <span className={cn("inline-flex overflow-hidden rounded-2xl", className)}>
+      <Image
+        src="/logo-light.png"
+        alt="my-pocket — учёт доходов и расходов"
+        width={1536}
+        height={1024}
+        priority
+        className="block h-auto w-80 dark:hidden"
+      />
+      <Image
+        src="/logo-dark.png"
+        alt="my-pocket — учёт доходов и расходов"
+        width={1536}
+        height={1024}
+        priority
+        className="hidden h-auto w-80 dark:block"
+      />
     </span>
   );
 }
