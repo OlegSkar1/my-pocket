@@ -88,6 +88,7 @@ function DateField({
 }) {
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
+  const [month, setMonth] = useState<Date | undefined>();
 
   const label = format(parseISO(value), "d MMMM yyyy", { locale: ru });
   const handleSelect = (date: Date | undefined) => {
@@ -97,12 +98,18 @@ function DateField({
     }
   };
 
-  const trigger = (
+  // Инициализация отображаемого месяца при открытии (без эффекта).
+  const handleOpenChange = (next: boolean) => {
+    if (next) setMonth(parseISO(value));
+    setOpen(next);
+  };
+
+  const triggerButton = (onClick?: () => void) => (
     <Button
       type="button"
       variant="outline"
       className="w-full justify-start gap-2 font-normal"
-      onClick={() => setOpen(true)}
+      onClick={onClick}
     >
       <CalendarIcon className="h-4 w-4" />
       {label}
@@ -112,7 +119,7 @@ function DateField({
   if (isMobile) {
     return (
       <DrawerNested open={open} onOpenChange={setOpen}>
-        <FormControl>{trigger}</FormControl>
+        <FormControl>{triggerButton(() => handleOpenChange(true))}</FormControl>
         <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Выберите дату</DrawerTitle>
@@ -120,9 +127,11 @@ function DateField({
           <div className="flex justify-center px-5 pb-6">
             <Calendar
               mode="single"
+              month={month}
+              onMonthChange={setMonth}
               selected={parseISO(value)}
-              defaultMonth={parseISO(value)}
               onSelect={handleSelect}
+              disabled={{ after: new Date() }}
             />
           </div>
         </DrawerContent>
@@ -131,9 +140,9 @@ function DateField({
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        <FormControl>{trigger}</FormControl>
+        <FormControl>{triggerButton()}</FormControl>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
         <Calendar

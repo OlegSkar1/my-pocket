@@ -20,6 +20,7 @@ export interface FiltersState {
   selectCategory: (categoryId: string) => void;
   selectCard: (type: TransactionType) => void;
   clearSelection: () => void;
+  resetFilters: () => void;
 }
 
 const now = new Date();
@@ -52,4 +53,11 @@ export const useFiltersStore = create<FiltersState>((set, get) => ({
     }
   },
   clearSelection: () => set({ selection: null }),
+  resetFilters: () =>
+    set({
+      dateFrom: defaultFrom,
+      dateTo: defaultTo,
+      categoryIds: [],
+      selection: null,
+    }),
 }));

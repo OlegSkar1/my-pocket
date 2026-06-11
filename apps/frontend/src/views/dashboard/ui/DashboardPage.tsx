@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, RotateCcw } from "lucide-react";
 import {
   CategoryFilter,
   PeriodFilter,
@@ -18,6 +18,7 @@ import { Button } from "@/shared/ui/button";
 
 export function DashboardPage() {
   const selection = useFiltersStore((s) => s.selection);
+  const resetFilters = useFiltersStore((s) => s.resetFilters);
   const [createOpen, setCreateOpen] = useState(false);
 
   return (
@@ -31,6 +32,14 @@ export function DashboardPage() {
           <div className="flex flex-wrap items-center gap-3">
             <PeriodFilter />
             <CategoryFilter />
+            <Button
+              variant="ghost"
+              className="gap-2 text-muted-foreground"
+              onClick={resetFilters}
+            >
+              <RotateCcw className="h-4 w-4" />
+              Сбросить
+            </Button>
             <Button className="ml-auto gap-2" onClick={() => setCreateOpen(true)}>
               <Plus className="h-4 w-4" />
               Добавить
