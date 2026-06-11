@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { EmojiPicker } from "frimousse";
@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/shared/ui/form";
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import { useCreateCategory, useUpdateCategory } from "../model/mutations";
 import { categorySchema, type CategoryFormValues } from "../model/schema";
 
@@ -63,9 +62,17 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
     defaultValues: toFormValues(category),
   });
 
+  const [pickerOpen, setPickerOpen] = useState(false);
+
   useEffect(() => {
     if (open) form.reset(toFormValues(category));
   }, [open, category, form]);
+
+  // Сброс пикера при закрытии (в обработчике, а не в эффекте).
+  const handleOpenChange = (next: boolean) => {
+    if (!next) setPickerOpen(false);
+    onOpenChange(next);
+  };
 
   const onSubmit = (values: CategoryFormValues) => {
     const onSuccess = () => onOpenChange(false);
@@ -79,7 +86,7 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
   const isPending = create.isPending || update.isPending;
 
   return (
-    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+    <ResponsiveModal open={open} onOpenChange={handleOpenChange}>
       <ResponsiveModalContent>
         <ResponsiveModalHeader>
           <ResponsiveModalTitle>
@@ -103,36 +110,16 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Иконка</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="h-10 w-12 text-xl"
-                            >
-                              {field.value}
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0">
-                          <EmojiPicker.Root
-                            onEmojiSelect={({ emoji }) => field.onChange(emoji)}
-                            className="h-72 w-72"
-                          >
-                            <EmojiPicker.Search className="m-2 rounded-md border border-input bg-background px-2 py-1 text-sm" />
-                            <EmojiPicker.Viewport className="relative flex-1 overflow-y-auto">
-                              <EmojiPicker.Loading className="p-2 text-sm text-muted-foreground">
-                                Загрузка…
-                              </EmojiPicker.Loading>
-                              <EmojiPicker.Empty className="p-2 text-sm text-muted-foreground">
-                                Не найдено
-                              </EmojiPicker.Empty>
-                              <EmojiPicker.List />
-                            </EmojiPicker.Viewport>
-                          </EmojiPicker.Root>
-                        </PopoverContent>
-                      </Popover>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-10 w-12 text-xl"
+                          onClick={() => setPickerOpen((o) => !o)}
+                        >
+                          {field.value}
+                        </Button>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -152,6 +139,35 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
                   )}
                 />
               </div>
+
+              {/* Инлайновый эмодзи-пикер: внутри контента модалки, где скролл
+                  колесом разрешён (Popover-портал блокировался react-remove-scroll). */}
+              {pickerOpen && (
+                <div className="overflow-hidden rounded-md border">
+                  <EmojiPicker.Root
+                    locale="ru"
+                    onEmojiSelect={({ emoji }) => {
+                      form.setValue("icon", emoji, { shouldValidate: true });
+                      setPickerOpen(false);
+                    }}
+                    className="flex h-64 w-full flex-col bg-card"
+                  >
+                    <EmojiPicker.Search
+                      placeholder="Поиск…"
+                      className="m-2 rounded-md border border-input bg-background px-2 py-1.5 text-sm outline-none"
+                    />
+                    <EmojiPicker.Viewport className="relative min-h-0 flex-1 overflow-y-auto">
+                      <EmojiPicker.Loading className="p-2 text-sm text-muted-foreground">
+                        Загрузка…
+                      </EmojiPicker.Loading>
+                      <EmojiPicker.Empty className="p-2 text-sm text-muted-foreground">
+                        Не найдено
+                      </EmojiPicker.Empty>
+                      <EmojiPicker.List className="pb-2" />
+                    </EmojiPicker.Viewport>
+                  </EmojiPicker.Root>
+                </div>
+              )}
 
               <FormField
                 control={form.control}
