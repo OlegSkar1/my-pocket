@@ -8,18 +8,25 @@ import { ru } from "date-fns/locale";
 import { CalendarIcon } from "lucide-react";
 import type { Transaction } from "@my-pocket/shared-types";
 import { useCategories } from "@/entities/category";
+import { useIsMobile } from "@/shared/lib";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Calendar } from "@/shared/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover";
 import {
-  Drawer,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerNested,
   DrawerTitle,
 } from "@/shared/ui/drawer";
+import {
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalDescription,
+  ResponsiveModalFooter,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/shared/ui/responsive-modal";
 import {
   Form,
   FormControl,
@@ -70,13 +77,82 @@ function toFormValues(transaction?: Transaction | null): TransactionFormValues {
   };
 }
 
+// Выбор даты: на десктопе — Popover с календарём, на мобиле — вложенный
+// Drawer (его свайп/закрытие не закрывает форму).
+function DateField({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const isMobile = useIsMobile();
+  const [open, setOpen] = useState(false);
+
+  const label = format(parseISO(value), "d MMMM yyyy", { locale: ru });
+  const handleSelect = (date: Date | undefined) => {
+    if (date) {
+      onChange(format(date, "yyyy-MM-dd"));
+      setOpen(false);
+    }
+  };
+
+  const trigger = (
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full justify-start gap-2 font-normal"
+      onClick={() => setOpen(true)}
+    >
+      <CalendarIcon className="h-4 w-4" />
+      {label}
+    </Button>
+  );
+
+  if (isMobile) {
+    return (
+      <DrawerNested open={open} onOpenChange={setOpen}>
+        <FormControl>{trigger}</FormControl>
+        <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Выберите дату</DrawerTitle>
+          </DrawerHeader>
+          <div className="flex justify-center px-5 pb-6">
+            <Calendar
+              mode="single"
+              selected={parseISO(value)}
+              defaultMonth={parseISO(value)}
+              onSelect={handleSelect}
+            />
+          </div>
+        </DrawerContent>
+      </DrawerNested>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <FormControl>{trigger}</FormControl>
+      </PopoverTrigger>
+      <PopoverContent className="w-auto p-0" align="start">
+        <Calendar
+          mode="single"
+          selected={parseISO(value)}
+          defaultMonth={parseISO(value)}
+          onSelect={handleSelect}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 export function TransactionFormDialog({ open, onOpenChange, transaction }: Props) {
   const { data: categories } = useCategories();
   const create = useCreateTransaction();
   const update = useUpdateTransaction();
   const remove = useDeleteTransaction();
   const isEdit = Boolean(transaction);
-  const [dateOpen, setDateOpen] = useState(false);
 
   const form = useForm<TransactionFormValues>({
     resolver: standardSchemaResolver(transactionSchema),
@@ -114,16 +190,16 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
   const isPending = create.isPending || update.isPending || remove.isPending;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent>
+        <ResponsiveModalHeader>
+          <ResponsiveModalTitle>
             {isEdit ? "Редактировать транзакцию" : "Новая транзакция"}
-          </DrawerTitle>
-          <DrawerDescription>
+          </ResponsiveModalTitle>
+          <ResponsiveModalDescription>
             Заполните сумму, тип, дату и категорию.
-          </DrawerDescription>
-        </DrawerHeader>
+          </ResponsiveModalDescription>
+        </ResponsiveModalHeader>
 
         <Form {...form}>
           <form
@@ -173,41 +249,7 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Дата</FormLabel>
-                    {/* Календарь — вложенный дровер. Его свайп/закрытие
-                        не закрывает родительский дровер транзакции. */}
-                    <DrawerNested open={dateOpen} onOpenChange={setDateOpen}>
-                      <FormControl>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className="w-full justify-start gap-2 font-normal"
-                          onClick={() => setDateOpen(true)}
-                        >
-                          <CalendarIcon className="h-4 w-4" />
-                          {format(parseISO(field.value), "d MMMM yyyy", {
-                            locale: ru,
-                          })}
-                        </Button>
-                      </FormControl>
-                      <DrawerContent>
-                        <DrawerHeader>
-                          <DrawerTitle>Выберите дату</DrawerTitle>
-                        </DrawerHeader>
-                        <div className="flex justify-center px-5 pb-6">
-                          <Calendar
-                            mode="single"
-                            selected={parseISO(field.value)}
-                            defaultMonth={parseISO(field.value)}
-                            onSelect={(date) => {
-                              if (date) {
-                                field.onChange(format(date, "yyyy-MM-dd"));
-                                setDateOpen(false);
-                              }
-                            }}
-                          />
-                        </div>
-                      </DrawerContent>
-                    </DrawerNested>
+                    <DateField value={field.value} onChange={field.onChange} />
                     <FormMessage />
                   </FormItem>
                 )}
@@ -253,7 +295,7 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
               />
             </div>
 
-            <DrawerFooter>
+            <ResponsiveModalFooter>
               <Button type="submit" disabled={isPending}>
                 {isPending ? "Сохранение..." : "Сохранить"}
               </Button>
@@ -267,10 +309,10 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
                   Удалить
                 </Button>
               )}
-            </DrawerFooter>
+            </ResponsiveModalFooter>
           </form>
         </Form>
-      </DrawerContent>
-    </Drawer>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 }

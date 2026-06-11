@@ -84,3 +84,11 @@ export {
   DrawerDescription,
 } from "./drawer";
 export { Logo } from "./logo";
+export {
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalHeader,
+  ResponsiveModalFooter,
+  ResponsiveModalTitle,
+  ResponsiveModalDescription,
+} from "./responsive-modal";

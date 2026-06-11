@@ -9,13 +9,13 @@ import { cn } from "@/shared/lib";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/shared/ui/drawer";
+  ResponsiveModal,
+  ResponsiveModalContent,
+  ResponsiveModalDescription,
+  ResponsiveModalFooter,
+  ResponsiveModalHeader,
+  ResponsiveModalTitle,
+} from "@/shared/ui/responsive-modal";
 import {
   Form,
   FormControl,
@@ -79,16 +79,16 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
   const isPending = create.isPending || update.isPending;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>
+    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+      <ResponsiveModalContent>
+        <ResponsiveModalHeader>
+          <ResponsiveModalTitle>
             {isEdit ? "Редактировать категорию" : "Новая категория"}
-          </DrawerTitle>
-          <DrawerDescription>
+          </ResponsiveModalTitle>
+          <ResponsiveModalDescription>
             Название, эмодзи-иконка и цвет для категории.
-          </DrawerDescription>
-        </DrawerHeader>
+          </ResponsiveModalDescription>
+        </ResponsiveModalHeader>
 
         <Form {...form}>
           <form
@@ -182,14 +182,14 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
               />
             </div>
 
-            <DrawerFooter>
+            <ResponsiveModalFooter>
               <Button type="submit" disabled={isPending}>
                 {isPending ? "Сохранение..." : "Сохранить"}
               </Button>
-            </DrawerFooter>
+            </ResponsiveModalFooter>
           </form>
         </Form>
-      </DrawerContent>
-    </Drawer>
+      </ResponsiveModalContent>
+    </ResponsiveModal>
   );
 }
