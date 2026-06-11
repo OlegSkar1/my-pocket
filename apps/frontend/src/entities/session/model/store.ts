@@ -10,7 +10,13 @@ export const useSessionStore = create<SessionState>()(
       isAuthenticated: false,
       setSession: (response: AuthResponse) =>
         set({ user: response.user, isAuthenticated: true }),
-      clear: () => set({ user: null, isAuthenticated: false }),
+      clear: () => {
+        // Тема — личная настройка; забываем её вместе с сессией.
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem("theme");
+        }
+        set({ user: null, isAuthenticated: false });
+      },
     }),
     { name: "session" },
   ),
