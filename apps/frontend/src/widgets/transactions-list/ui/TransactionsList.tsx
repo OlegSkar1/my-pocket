@@ -8,19 +8,25 @@ import { useCategories } from "@/entities/category";
 import { useTransactions } from "@/entities/transaction";
 import { useListFilters } from "@/features/transaction-filters";
 import { TransactionFormDialog } from "@/features/transaction-crud";
-import { cn, formatMoney } from "@/shared/lib";
+import { cn, formatMoney, useIsMobile } from "@/shared/lib";
+import { Button } from "@/shared/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 export function TransactionsList() {
   const filters = useListFilters();
+  const isMobile = useIsMobile();
+  // Размер страницы = сколько показываем по умолчанию: 3 на мобиле, 10 на десктопе.
+  const pageSize = isMobile ? 3 : 10;
+  const [showAll, setShowAll] = useState(false);
+
   const {
     data,
     isLoading,
     hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
-  } = useTransactions(filters);
+  } = useTransactions({ ...filters, limit: pageSize });
   const { data: categories } = useCategories();
 
   const [editing, setEditing] = useState<Transaction | null>(null);
@@ -38,10 +44,13 @@ export function TransactionsList() {
     [data],
   );
 
-  // Бесконечная подгрузка через IntersectionObserver на маркере в конце списка.
+  // По умолчанию показываем только первую страницу; «Показать все» разворачивает.
+  const visibleItems = showAll ? items : items.slice(0, pageSize);
+
+  // Бесконечная подгрузка только в развёрнутом режиме.
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasNextPage) return;
+    if (!showAll || !sentinel || !hasNextPage) return;
 
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
@@ -50,22 +59,35 @@ export function TransactionsList() {
     });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [showAll, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const openEdit = (transaction: Transaction) => {
     setEditing(transaction);
     setDialogOpen(true);
   };
 
+  // Кнопка нужна, если есть что разворачивать: есть ещё страницы, уже развёрнуто,
+  // либо уже загружено больше, чем показываем по умолчанию.
+  const canToggle = showAll || hasNextPage || items.length > pageSize;
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Транзакции</CardTitle>
+        {canToggle && items.length > 0 && (
+          <Button
+            variant="link"
+            className="h-auto p-0 text-sm"
+            onClick={() => setShowAll((v) => !v)}
+          >
+            {showAll ? "Свернуть" : "Показать все"}
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="space-y-1">
         {isLoading ? (
           <div className="space-y-2">
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-14 w-full" />
             ))}
           </div>
@@ -75,7 +97,7 @@ export function TransactionsList() {
           </p>
         ) : (
           <>
-            {items.map((transaction) => {
+            {visibleItems.map((transaction) => {
               const category = categoryMap.get(transaction.categoryId);
               const isExpense = transaction.type === "EXPENSE";
               return (
@@ -113,12 +135,16 @@ export function TransactionsList() {
               );
             })}
 
-            <div ref={sentinelRef} />
-            {isFetchingNextPage && <Skeleton className="h-14 w-full" />}
-            {!hasNextPage && (
-              <p className="py-3 text-center text-xs text-muted-foreground">
-                Больше нет транзакций
-              </p>
+            {showAll && (
+              <>
+                <div ref={sentinelRef} />
+                {isFetchingNextPage && <Skeleton className="h-14 w-full" />}
+                {!hasNextPage && (
+                  <p className="py-3 text-center text-xs text-muted-foreground">
+                    Больше нет транзакций
+                  </p>
+                )}
+              </>
             )}
           </>
         )}
