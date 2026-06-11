@@ -106,17 +106,38 @@ export interface TransactionsQuery {
   dateTo?: string;
   type?: TransactionType;
   categoryId?: string;
+  categoryIds?: string[];
+  page?: number;
+  limit?: number;
 }
 
 export interface CategorySummary {
   categoryId: string;
   totalIncome: string;
   totalExpense: string;
+  transactionCount: number;
 }
 
 export interface TransactionsSummary {
   totalIncome: string;
   totalExpense: string;
   balance: string;
+  transactionCount: number;
   byCategory: CategorySummary[];
+}
+
+export interface MonthlyStat {
+  month: string; // "YYYY-MM"
+  income: string;
+  expense: string;
+}
+
+export type MonthlyStats = MonthlyStat[];
+
+// Постраничный результат (offset-пагинация).
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
 }

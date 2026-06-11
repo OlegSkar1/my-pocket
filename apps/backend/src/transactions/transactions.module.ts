@@ -9,6 +9,7 @@ import { DeleteTransactionHandler } from "./commands/handlers/delete-transaction
 import { GetTransactionsHandler } from "./queries/handlers/get-transactions.handler";
 import { GetTransactionByIdHandler } from "./queries/handlers/get-transaction-by-id.handler";
 import { GetTransactionsSummaryHandler } from "./queries/handlers/get-transactions-summary.handler";
+import { GetMonthlyStatsHandler } from "./queries/handlers/get-monthly-stats.handler";
 
 const CommandHandlers = [
   CreateTransactionHandler,
@@ -19,6 +20,7 @@ const QueryHandlers = [
   GetTransactionsHandler,
   GetTransactionByIdHandler,
   GetTransactionsSummaryHandler,
+  GetMonthlyStatsHandler,
 ];
 
 @Module({
