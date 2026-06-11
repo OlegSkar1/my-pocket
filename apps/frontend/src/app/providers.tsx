@@ -53,7 +53,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TokenGuard>{children}</TokenGuard>
+      {/* Обёртка для vaul: масштабирование фона при выезде дровера снизу. */}
+      <div data-vaul-drawer-wrapper="" className="min-h-svh bg-background">
+        <TokenGuard>{children}</TokenGuard>
+      </div>
       <Toaster />
     </QueryClientProvider>
   );

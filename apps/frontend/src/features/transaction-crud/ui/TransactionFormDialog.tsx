@@ -1,21 +1,25 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
+import { ru } from "date-fns/locale";
+import { CalendarIcon } from "lucide-react";
 import type { Transaction } from "@my-pocket/shared-types";
 import { useCategories } from "@/entities/category";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Calendar } from "@/shared/ui/calendar";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerNested,
+  DrawerTitle,
+} from "@/shared/ui/drawer";
 import {
   Form,
   FormControl,
@@ -72,13 +76,13 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
   const update = useUpdateTransaction();
   const remove = useDeleteTransaction();
   const isEdit = Boolean(transaction);
+  const [dateOpen, setDateOpen] = useState(false);
 
   const form = useForm<TransactionFormValues>({
     resolver: standardSchemaResolver(transactionSchema),
     defaultValues: toFormValues(transaction),
   });
 
-  // При открытии/смене редактируемой транзакции — перезаполнить форму.
   useEffect(() => {
     if (open) form.reset(toFormValues(transaction));
   }, [open, transaction, form]);
@@ -110,131 +114,163 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
   const isPending = create.isPending || update.isPending || remove.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>
             {isEdit ? "Редактировать транзакцию" : "Новая транзакция"}
-          </DialogTitle>
-          <DialogDescription>
+          </DrawerTitle>
+          <DrawerDescription>
             Заполните сумму, тип, дату и категорию.
-          </DialogDescription>
-        </DialogHeader>
+          </DrawerDescription>
+        </DrawerHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Тип</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <div className="flex-1 space-y-4 overflow-y-auto px-5">
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Тип</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="EXPENSE">Расход</SelectItem>
+                        <SelectItem value="INCOME">Доход</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Сумма</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
+                      <Input inputMode="decimal" placeholder="0.00" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      <SelectItem value="EXPENSE">Расход</SelectItem>
-                      <SelectItem value="INCOME">Доход</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="amount"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Сумма</FormLabel>
-                  <FormControl>
-                    <Input
-                      inputMode="decimal"
-                      placeholder="0.00"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Дата</FormLabel>
+                    {/* Календарь — вложенный дровер. Его свайп/закрытие
+                        не закрывает родительский дровер транзакции. */}
+                    <DrawerNested open={dateOpen} onOpenChange={setDateOpen}>
+                      <FormControl>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full justify-start gap-2 font-normal"
+                          onClick={() => setDateOpen(true)}
+                        >
+                          <CalendarIcon className="h-4 w-4" />
+                          {format(parseISO(field.value), "d MMMM yyyy", {
+                            locale: ru,
+                          })}
+                        </Button>
+                      </FormControl>
+                      <DrawerContent>
+                        <DrawerHeader>
+                          <DrawerTitle>Выберите дату</DrawerTitle>
+                        </DrawerHeader>
+                        <div className="flex justify-center px-5 pb-6">
+                          <Calendar
+                            mode="single"
+                            selected={parseISO(field.value)}
+                            defaultMonth={parseISO(field.value)}
+                            onSelect={(date) => {
+                              if (date) {
+                                field.onChange(format(date, "yyyy-MM-dd"));
+                                setDateOpen(false);
+                              }
+                            }}
+                          />
+                        </div>
+                      </DrawerContent>
+                    </DrawerNested>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Дата</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="categoryId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Категория</FormLabel>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Выберите категорию" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories?.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.icon} {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="categoryId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Категория</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Назначение</FormLabel>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Выберите категорию" />
-                      </SelectTrigger>
+                      <Input placeholder="Например, продукты" {...field} />
                     </FormControl>
-                    <SelectContent>
-                      {categories?.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.icon} {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Назначение</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Например, продукты" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter>
+            <DrawerFooter>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Сохранение..." : "Сохранить"}
+              </Button>
               {isEdit && (
                 <Button
                   type="button"
                   variant="destructive"
                   disabled={isPending}
                   onClick={handleDelete}
-                  className="sm:mr-auto"
                 >
                   Удалить
                 </Button>
               )}
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Сохранение..." : "Сохранить"}
-              </Button>
-            </DialogFooter>
+            </DrawerFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   );
 }

@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/features/theme-toggle";
 import { ROUTES } from "@/shared/config";
 import { cn } from "@/shared/lib";
 import { Button } from "@/shared/ui/button";
+import { Logo } from "@/shared/ui/logo";
 
 const NAV = [
   { href: ROUTES.home, label: "Главная", icon: Home },
@@ -24,7 +25,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex items-center justify-between px-2 py-1">
-        <span className="text-lg font-bold">my-pocket</span>
+        <Logo />
         <ThemeToggle />
       </div>
 

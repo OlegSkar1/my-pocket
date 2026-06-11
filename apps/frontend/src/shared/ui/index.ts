@@ -70,3 +70,17 @@ export {
 export { Calendar } from "./calendar";
 export { Skeleton } from "./skeleton";
 export { Toaster } from "./sonner";
+export {
+  Drawer,
+  DrawerNested,
+  DrawerTrigger,
+  DrawerPortal,
+  DrawerClose,
+  DrawerOverlay,
+  DrawerContent,
+  DrawerHeader,
+  DrawerFooter,
+  DrawerTitle,
+  DrawerDescription,
+} from "./drawer";
+export { Logo } from "./logo";

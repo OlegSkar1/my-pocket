@@ -9,13 +9,13 @@ import { cn } from "@/shared/lib";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/shared/ui/drawer";
 import {
   Form,
   FormControl,
@@ -79,112 +79,117 @@ export function CategoryFormDialog({ open, onOpenChange, category }: Props) {
   const isPending = create.isPending || update.isPending;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent>
+        <DrawerHeader>
+          <DrawerTitle>
             {isEdit ? "Редактировать категорию" : "Новая категория"}
-          </DialogTitle>
-          <DialogDescription>
+          </DrawerTitle>
+          <DrawerDescription>
             Название, эмодзи-иконка и цвет для категории.
-          </DialogDescription>
-        </DialogHeader>
+          </DrawerDescription>
+        </DrawerHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex items-end gap-3">
-              <FormField
-                control={form.control}
-                name="icon"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Иконка</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            className="h-10 w-12 text-xl"
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex min-h-0 flex-1 flex-col"
+          >
+            <div className="flex-1 space-y-4 overflow-y-auto px-5">
+              <div className="flex items-end gap-3">
+                <FormField
+                  control={form.control}
+                  name="icon"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Иконка</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="h-10 w-12 text-xl"
+                            >
+                              {field.value}
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <EmojiPicker.Root
+                            onEmojiSelect={({ emoji }) => field.onChange(emoji)}
+                            className="h-72 w-72"
                           >
-                            {field.value}
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <EmojiPicker.Root
-                          onEmojiSelect={({ emoji }) => field.onChange(emoji)}
-                          className="h-72 w-72"
-                        >
-                          <EmojiPicker.Search className="m-2 rounded-md border border-input bg-background px-2 py-1 text-sm" />
-                          <EmojiPicker.Viewport className="relative flex-1 overflow-y-auto">
-                            <EmojiPicker.Loading className="p-2 text-sm text-muted-foreground">
-                              Загрузка…
-                            </EmojiPicker.Loading>
-                            <EmojiPicker.Empty className="p-2 text-sm text-muted-foreground">
-                              Не найдено
-                            </EmojiPicker.Empty>
-                            <EmojiPicker.List />
-                          </EmojiPicker.Viewport>
-                        </EmojiPicker.Root>
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            <EmojiPicker.Search className="m-2 rounded-md border border-input bg-background px-2 py-1 text-sm" />
+                            <EmojiPicker.Viewport className="relative flex-1 overflow-y-auto">
+                              <EmojiPicker.Loading className="p-2 text-sm text-muted-foreground">
+                                Загрузка…
+                              </EmojiPicker.Loading>
+                              <EmojiPicker.Empty className="p-2 text-sm text-muted-foreground">
+                                Не найдено
+                              </EmojiPicker.Empty>
+                              <EmojiPicker.List />
+                            </EmojiPicker.Viewport>
+                          </EmojiPicker.Root>
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel>Название</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Например, Продукты" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
-                name="name"
+                name="color"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Название</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Например, Продукты" {...field} />
-                    </FormControl>
+                  <FormItem>
+                    <FormLabel>Цвет</FormLabel>
+                    <div className="flex flex-wrap gap-2">
+                      {PRESET_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          type="button"
+                          onClick={() => field.onChange(color)}
+                          style={{ backgroundColor: color }}
+                          className={cn(
+                            "h-8 w-8 rounded-full border-2 transition",
+                            field.value === color
+                              ? "border-foreground"
+                              : "border-transparent",
+                          )}
+                          aria-label={color}
+                        />
+                      ))}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Цвет</FormLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {PRESET_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        onClick={() => field.onChange(color)}
-                        style={{ backgroundColor: color }}
-                        className={cn(
-                          "h-8 w-8 rounded-full border-2 transition",
-                          field.value === color
-                            ? "border-foreground"
-                            : "border-transparent",
-                        )}
-                        aria-label={color}
-                      />
-                    ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <DialogFooter>
+            <DrawerFooter>
               <Button type="submit" disabled={isPending}>
                 {isPending ? "Сохранение..." : "Сохранить"}
               </Button>
-            </DialogFooter>
+            </DrawerFooter>
           </form>
         </Form>
-      </DialogContent>
-    </Dialog>
+      </DrawerContent>
+    </Drawer>
   );
 }
