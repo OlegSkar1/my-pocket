@@ -13,7 +13,7 @@ function Toaster(props: ToasterProps) {
       theme={theme}
       className="toaster group"
       richColors
-      position="top-right"
+      position="bottom-right"
       {...props}
     />
   );
