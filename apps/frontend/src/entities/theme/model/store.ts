@@ -9,8 +9,8 @@ export interface ThemeState {
   toggle: () => void;
 }
 
-// Дефолт из системной темы, если в localStorage ещё ничего нет.
-function systemTheme(): Theme {
+// Системная тема — используется как дефолт, если в localStorage пусто.
+export function systemTheme(): Theme {
   if (typeof window === "undefined") return "light";
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
@@ -20,10 +20,14 @@ function systemTheme(): Theme {
 export const useThemeStore = create<ThemeState>()(
   persist(
     (set, get) => ({
-      theme: systemTheme(),
+      // Детерминированный дефолт: и сервер, и первый клиентский рендер дают
+      // "light" — иначе hydration mismatch. Реальная тема подхватывается из
+      // localStorage в эффекте (skipHydration), а визуально её до гидрации
+      // уже применяет анти-FOUC инлайн-скрипт в <head>.
+      theme: "light",
       setTheme: (theme) => set({ theme }),
       toggle: () => set({ theme: get().theme === "dark" ? "light" : "dark" }),
     }),
-    { name: "theme" },
+    { name: "theme", skipHydration: true },
   ),
 );

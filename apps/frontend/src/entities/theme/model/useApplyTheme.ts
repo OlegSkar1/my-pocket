@@ -1,12 +1,22 @@
 import { useEffect } from "react";
-import { useThemeStore } from "./store";
+import { systemTheme, useThemeStore } from "./store";
 
-// Применяет класс `dark` к <html> при каждой смене темы.
+// Применяет класс `dark` к <html> и однократно гидрирует persisted-тему.
 export function useApplyTheme(): void {
   const theme = useThemeStore((s) => s.theme);
 
+  // Гидрация после монтирования (persist со skipHydration), чтобы первый
+  // клиентский рендер совпал с серверным. Если в localStorage ничего нет —
+  // берём системную тему.
   useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
+    const hasStored = window.localStorage.getItem("theme") !== null;
+    void useThemeStore.persist.rehydrate();
+    if (!hasStored) {
+      useThemeStore.getState().setTheme(systemTheme());
+    }
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 }
