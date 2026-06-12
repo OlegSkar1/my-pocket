@@ -11,6 +11,20 @@ interface MonthlyRow {
   sum: Prisma.Decimal;
 }
 
+// "YYYY-MM-DD" → начало этого дня в UTC. Без этого new Date("YYYY-MM-DD")
+// уже даёт 00:00 UTC, но мы оборачиваем явно для симметрии с next-day.
+function startOfDayUtc(dateStr: string): Date {
+  return new Date(`${dateStr}T00:00:00.000Z`);
+}
+
+// "YYYY-MM-DD" → начало следующего дня в UTC. Используется как верхняя
+// полуоткрытая граница, чтобы dateTo был включительным.
+function startOfNextDayUtc(dateStr: string): Date {
+  const d = new Date(`${dateStr}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + 1);
+  return d;
+}
+
 @Injectable()
 export class TransactionsRepository {
   constructor(private readonly prisma: PrismaService) {}
@@ -26,7 +40,7 @@ export class TransactionsRepository {
     take: number,
   ): Promise<{ items: Transaction[]; total: number }> {
     const where = this.buildWhere(userId, filters);
-    const [items, total] = await this.prisma.$transaction([
+    const [items, total] = await Promise.all([
       this.prisma.transaction.findMany({
         where,
         orderBy: { date: "desc" },
@@ -91,10 +105,10 @@ export class TransactionsRepository {
       conditions.push(Prisma.sql`"categoryId" = ${filters.categoryId}`);
     }
     if (filters.dateFrom) {
-      conditions.push(Prisma.sql`"date" >= ${new Date(filters.dateFrom)}`);
+      conditions.push(Prisma.sql`"date" >= ${startOfDayUtc(filters.dateFrom)}`);
     }
     if (filters.dateTo) {
-      conditions.push(Prisma.sql`"date" <= ${new Date(filters.dateTo)}`);
+      conditions.push(Prisma.sql`"date" < ${startOfNextDayUtc(filters.dateTo)}`);
     }
 
     return this.prisma.$queryRaw<MonthlyRow[]>(Prisma.sql`
@@ -122,8 +136,9 @@ export class TransactionsRepository {
 
     if (filters.dateFrom || filters.dateTo) {
       where.date = {};
-      if (filters.dateFrom) where.date.gte = new Date(filters.dateFrom);
-      if (filters.dateTo) where.date.lte = new Date(filters.dateTo);
+      if (filters.dateFrom) where.date.gte = startOfDayUtc(filters.dateFrom);
+      // Полуоткрытый интервал: < начало следующего дня — чтобы dateTo был включительным.
+      if (filters.dateTo) where.date.lt = startOfNextDayUtc(filters.dateTo);
     }
 
     return where;

@@ -18,9 +18,9 @@ import { formatMoney } from "@/shared/lib";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Skeleton } from "@/shared/ui/skeleton";
 
-// "YYYY-MM" → "июнь 2026"
+// "YYYY-MM" → "июн 2026"
 function monthLabel(month: string): string {
-  return format(parse(month, "yyyy-MM", new Date()), "LLL yy", { locale: ru });
+  return format(parse(month, "yyyy-MM", new Date()), "LLL yyyy", { locale: ru });
 }
 
 export function MonthlyChart() {
