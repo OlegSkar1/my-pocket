@@ -25,15 +25,22 @@ export function Logo({ withText = true, className }: LogoProps) {
 // Полноценный логотип-изображение с тег-лайном. Светлая/тёмная версии
 // переключаются по классу .dark (ставится анти-FOUC скриптом до отрисовки).
 export function LogoImage({ className }: { className?: string }) {
+  const imgStyle = {
+    width: "320px",
+    height: "90px",
+    objectFit: "cover" as const,
+    objectPosition: "center 45%",
+  };
   return (
-    <span className={cn("inline-flex overflow-hidden rounded-2xl", className)}>
+    <span className={cn("inline-block overflow-hidden rounded-2xl", className)}>
       <Image
         src="/logo-light.png"
         alt="my-pocket — учёт доходов и расходов"
         width={1536}
         height={1024}
         priority
-        className="block h-auto w-80 dark:hidden"
+        className="block dark:hidden"
+        style={imgStyle}
       />
       <Image
         src="/logo-dark.png"
@@ -41,7 +48,8 @@ export function LogoImage({ className }: { className?: string }) {
         width={1536}
         height={1024}
         priority
-        className="hidden h-auto w-80 dark:block"
+        className="hidden dark:block"
+        style={imgStyle}
       />
     </span>
   );
