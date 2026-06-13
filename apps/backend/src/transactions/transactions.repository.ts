@@ -101,8 +101,6 @@ export class TransactionsRepository {
       conditions.push(
         Prisma.sql`"categoryId" IN (${Prisma.join(filters.categoryIds)})`,
       );
-    } else if (filters.categoryId) {
-      conditions.push(Prisma.sql`"categoryId" = ${filters.categoryId}`);
     }
     if (filters.dateFrom) {
       conditions.push(Prisma.sql`"date" >= ${startOfDayUtc(filters.dateFrom)}`);
@@ -130,8 +128,6 @@ export class TransactionsRepository {
     if (filters.type) where.type = filters.type;
     if (filters.categoryIds?.length) {
       where.categoryId = { in: filters.categoryIds };
-    } else if (filters.categoryId) {
-      where.categoryId = filters.categoryId;
     }
 
     if (filters.dateFrom || filters.dateTo) {

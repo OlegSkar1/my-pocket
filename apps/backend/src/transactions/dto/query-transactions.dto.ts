@@ -5,7 +5,7 @@ import {
   IsEnum,
   IsInt,
   IsOptional,
-  IsString,
+  IsUUID,
   Max,
   Min,
 } from "class-validator";
@@ -24,17 +24,13 @@ export class QueryTransactionsDto {
   @IsEnum(TransactionType)
   type?: TransactionType;
 
-  @IsOptional()
-  @IsString()
-  categoryId?: string;
-
   // Мультивыбор категорий. Одиночное значение нормализуем в массив.
   @IsOptional()
   @Transform(({ value }) =>
     value === undefined ? undefined : Array.isArray(value) ? value : [value],
   )
   @IsArray()
-  @IsString({ each: true })
+  @IsUUID("4", { each: true })
   categoryIds?: string[];
 
   @IsOptional()

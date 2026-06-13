@@ -83,6 +83,7 @@ export interface Transaction {
   categoryId: string;
   userId: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateTransactionDto {
@@ -105,7 +106,6 @@ export interface TransactionsQuery {
   dateFrom?: string;
   dateTo?: string;
   type?: TransactionType;
-  categoryId?: string;
   categoryIds?: string[];
   page?: number;
   limit?: number;
