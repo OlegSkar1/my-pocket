@@ -23,13 +23,22 @@ export interface FiltersState {
   resetFilters: () => void;
 }
 
-const now = new Date();
-const defaultFrom = format(startOfMonth(now), "yyyy-MM-dd");
-const defaultTo = format(endOfMonth(now), "yyyy-MM-dd");
+// Считаем диапазон «текущий месяц» лениво: при инициализации стора —
+// для начальных значений, при resetFilters — заново, чтобы долгая открытая
+// вкладка не возвращала пользователя в «вчерашний месяц».
+function currentMonthRange() {
+  const now = new Date();
+  return {
+    from: format(startOfMonth(now), "yyyy-MM-dd"),
+    to: format(endOfMonth(now), "yyyy-MM-dd"),
+  };
+}
+
+const initial = currentMonthRange();
 
 export const useFiltersStore = create<FiltersState>((set, get) => ({
-  dateFrom: defaultFrom,
-  dateTo: defaultTo,
+  dateFrom: initial.from,
+  dateTo: initial.to,
   categoryIds: [],
   selection: null,
   // Смена периода/фильтра категорий сбрасывает drill-down.
@@ -53,11 +62,13 @@ export const useFiltersStore = create<FiltersState>((set, get) => ({
     }
   },
   clearSelection: () => set({ selection: null }),
-  resetFilters: () =>
+  resetFilters: () => {
+    const { from, to } = currentMonthRange();
     set({
-      dateFrom: defaultFrom,
-      dateTo: defaultTo,
+      dateFrom: from,
+      dateTo: to,
       categoryIds: [],
       selection: null,
-    }),
+    });
+  },
 }));

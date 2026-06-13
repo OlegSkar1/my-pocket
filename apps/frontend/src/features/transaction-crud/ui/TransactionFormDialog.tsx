@@ -163,6 +163,8 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
   const remove = useDeleteTransaction();
   const isEdit = Boolean(transaction);
 
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   const form = useForm<TransactionFormValues>({
     resolver: standardSchemaResolver(transactionSchema),
     defaultValues: toFormValues(transaction),
@@ -171,6 +173,13 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
   useEffect(() => {
     if (open) form.reset(toFormValues(transaction));
   }, [open, transaction, form]);
+
+  // Сбрасываем "точно удалить?" при закрытии диалога, а не в эффекте, —
+  // чтобы не нарваться на react-hooks/set-state-in-effect.
+  const handleOpenChange = (next: boolean) => {
+    if (!next) setConfirmDelete(false);
+    onOpenChange(next);
+  };
 
   const onSubmit = (values: TransactionFormValues) => {
     const dto = {
@@ -190,16 +199,23 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
     }
   };
 
+  // Двухшаговое подтверждение: первый клик переключает кнопку в режим
+  // подтверждения, второй — выполняет удаление. Без отдельного AlertDialog,
+  // т. к. он не подключён в shared/ui, и без window.confirm — он ломает UX
+  // на мобильных и в Drawer-режиме.
   const handleDelete = () => {
-    if (transaction) {
-      remove.mutate(transaction.id, { onSuccess: () => onOpenChange(false) });
+    if (!transaction) return;
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
     }
+    remove.mutate(transaction.id, { onSuccess: () => onOpenChange(false) });
   };
 
   const isPending = create.isPending || update.isPending || remove.isPending;
 
   return (
-    <ResponsiveModal open={open} onOpenChange={onOpenChange}>
+    <ResponsiveModal open={open} onOpenChange={handleOpenChange}>
       <ResponsiveModalContent>
         <ResponsiveModalHeader>
           <ResponsiveModalTitle>
@@ -315,7 +331,7 @@ export function TransactionFormDialog({ open, onOpenChange, transaction }: Props
                   disabled={isPending}
                   onClick={handleDelete}
                 >
-                  Удалить
+                  {confirmDelete ? "Точно удалить?" : "Удалить"}
                 </Button>
               )}
             </ResponsiveModalFooter>
