@@ -6,7 +6,6 @@ import Link from "next/link";
 import { ROUTES } from "@/shared/config";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Checkbox } from "@/shared/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -23,7 +22,7 @@ export function LoginForm() {
 
   const form = useForm<LoginFormValues>({
     resolver: standardSchemaResolver(loginSchema),
-    defaultValues: { email: "", password: "", agreement: false },
+    defaultValues: { email: "", password: "" },
   });
 
   const onSubmit = (values: LoginFormValues) => mutate(values);
@@ -64,38 +63,6 @@ export function LoginForm() {
                   {...field}
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="agreement"
-          render={({ field }) => (
-            <FormItem>
-              <div className="flex items-start gap-2">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    id="agreement"
-                  />
-                </FormControl>
-                <FormLabel
-                  htmlFor="agreement"
-                  className="cursor-pointer text-sm font-normal leading-snug"
-                >
-                  Я принимаю{" "}
-                  <Link
-                    href="/terms"
-                    className="font-medium text-primary underline underline-offset-2 hover:opacity-80"
-                  >
-                    пользовательское соглашение
-                  </Link>{" "}
-                  и даю согласие на обработку персональных данных
-                </FormLabel>
-              </div>
               <FormMessage />
             </FormItem>
           )}

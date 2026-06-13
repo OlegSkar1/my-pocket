@@ -1,73 +1,154 @@
 @import "tailwindcss";
 
-/* Дизайн-токены (Tailwind v4, CSS-first).
-   Доступны как утилиты: bg-background, text-foreground, bg-primary и т.д. */
-@theme {
-  /* Базовые цвета */
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
+/* Тёмная тема через класс .dark на <html> (а не prefers-color-scheme),
+   чтобы переключать её вручную. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Карточка */
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.145 0 0);
+/* Светлая тема — значения по умолчанию.
+   Палитра в духе Ozon: электрик-синий #005BFF + насыщенный розовый. */
+:root {
+  --background: #f5f6f8;
+  --foreground: #0a0b12;
 
-  /* Основной акцент */
-  --color-primary: oklch(0.205 0 0);
-  --color-primary-foreground: oklch(0.985 0 0);
+  --card: #ffffff;
+  --card-foreground: #0a0b12;
 
-  /* Вторичный */
-  --color-secondary: oklch(0.97 0 0);
-  --color-secondary-foreground: oklch(0.205 0 0);
+  --primary: #005bff;
+  --primary-foreground: #ffffff;
 
-  /* Приглушённый */
-  --color-muted: oklch(0.97 0 0);
-  --color-muted-foreground: oklch(0.556 0 0);
+  --secondary: #eef1f6;
+  --secondary-foreground: #0a0b12;
 
-  /* Акцент hover */
-  --color-accent: oklch(0.97 0 0);
-  --color-accent-foreground: oklch(0.205 0 0);
+  --muted: #eef1f6;
+  --muted-foreground: #6b7280;
 
-  /* Деструктивный */
-  --color-destructive: oklch(0.577 0.245 27.325);
-  --color-destructive-foreground: oklch(0.985 0 0);
+  --accent: #e6efff;
+  --accent-foreground: #005bff;
 
-  /* Граница и инпут */
-  --color-border: oklch(0.922 0 0);
-  --color-input: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
+  --destructive: #f91155;
+  --destructive-foreground: #ffffff;
 
-  /* Радиусы */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  --border: #e4e7ec;
+  --input: #e4e7ec;
+  --ring: #005bff;
+
+  /* Акценты для графиков и сумм. */
+  --chart-expense: #f91155; /* розовый — расход */
+  --chart-income: #005bff; /* синий — доход */
 }
 
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-background: oklch(0.075 0 0);
-    --color-foreground: oklch(0.985 0 0);
+/* Тёмная тема — основная для финтех-вида: near-black + яркие акценты. */
+.dark {
+  --background: #08090d;
+  --foreground: #f4f5fa;
 
-    --color-card: oklch(0.13 0 0);
-    --color-card-foreground: oklch(0.985 0 0);
+  --card: #14161d;
+  --card-foreground: #f4f5fa;
 
-    --color-primary: oklch(0.985 0 0);
-    --color-primary-foreground: oklch(0.205 0 0);
+  --primary: #2f6bff;
+  --primary-foreground: #ffffff;
 
-    --color-secondary: oklch(0.17 0 0);
-    --color-secondary-foreground: oklch(0.985 0 0);
+  --secondary: #1b1d26;
+  --secondary-foreground: #f4f5fa;
 
-    --color-muted: oklch(0.17 0 0);
-    --color-muted-foreground: oklch(0.708 0 0);
+  --muted: #1b1d26;
+  --muted-foreground: #9197a6;
 
-    --color-accent: oklch(0.17 0 0);
-    --color-accent-foreground: oklch(0.985 0 0);
+  --accent: #16203a;
+  --accent-foreground: #6ea0ff;
 
-    --color-destructive: oklch(0.396 0.141 25.723);
-    --color-destructive-foreground: oklch(0.985 0 0);
+  --destructive: #ff2d6f;
+  --destructive-foreground: #ffffff;
 
-    --color-border: oklch(0.25 0 0);
-    --color-input: oklch(0.20 0 0);
-    --color-ring: oklch(0.556 0 0);
+  --border: #262833;
+  --input: #1f2129;
+  --ring: #2f6bff;
+
+  --chart-expense: #ff3d7f;
+  --chart-income: #2f6bff;
+}
+
+/* Маппинг CSS-переменных в дизайн-токены Tailwind.
+   `inline` — значения подставляются как var(), поэтому реагируют на .dark. */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-expense: var(--chart-expense);
+  --color-chart-income: var(--chart-income);
+
+  /* Крупные скругления — современный вид. */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-xl: 1.75rem;
+
+  /* Современный геометрический гротеск (подключается в layout). */
+  --font-sans: var(--font-manrope), system-ui, -apple-system, sans-serif;
+
+  /* Анимации Radix (data-[state]). */
+  --animate-fade-in: fade-in 150ms ease-out;
+  --animate-fade-out: fade-out 150ms ease-in;
+  --animate-zoom-in: zoom-in 150ms ease-out;
+  --animate-zoom-out: zoom-out 150ms ease-in;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+  @keyframes zoom-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  @keyframes zoom-out {
+    from {
+      opacity: 1;
+      transform: scale(1);
+    }
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
   }
 }
 
@@ -78,6 +159,8 @@
   body {
     background: var(--color-background);
     color: var(--color-foreground);
-    font-family: system-ui, -apple-system, sans-serif;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
 }

@@ -34,7 +34,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw new ApiError(res.status, message);
   }
 
-  return res.json() as Promise<T>;
+  // 204 No Content и любые ответы с пустым телом — возвращаем undefined,
+  // не пытаясь распарсить JSON (иначе "Unexpected end of JSON input").
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
+  const text = await res.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }
 
 export const apiClient = {

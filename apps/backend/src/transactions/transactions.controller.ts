@@ -13,7 +13,11 @@ import {
 } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { Transaction } from "@prisma/client";
-import { TransactionsSummary } from "@my-pocket/shared-types";
+import {
+  MonthlyStats,
+  PaginatedResult,
+  TransactionsSummary,
+} from "@my-pocket/shared-types";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import { CreateTransactionDto } from "./dto/create-transaction.dto";
@@ -25,6 +29,7 @@ import { DeleteTransactionCommand } from "./commands/delete-transaction.command"
 import { GetTransactionsQuery } from "./queries/get-transactions.query";
 import { GetTransactionByIdQuery } from "./queries/get-transaction-by-id.query";
 import { GetTransactionsSummaryQuery } from "./queries/get-transactions-summary.query";
+import { GetMonthlyStatsQuery } from "./queries/get-monthly-stats.query";
 
 @Controller("transactions")
 @UseGuards(JwtAuthGuard)
@@ -46,7 +51,7 @@ export class TransactionsController {
   findAll(
     @CurrentUser("userId") userId: string,
     @Query() filters: QueryTransactionsDto,
-  ): Promise<Transaction[]> {
+  ): Promise<PaginatedResult<Transaction>> {
     return this.queryBus.execute(new GetTransactionsQuery(userId, filters));
   }
 
@@ -59,6 +64,15 @@ export class TransactionsController {
     return this.queryBus.execute(
       new GetTransactionsSummaryQuery(userId, filters),
     );
+  }
+
+  // Должен идти ДО ":id", иначе "monthly" попадёт в параметр id.
+  @Get("monthly")
+  monthly(
+    @CurrentUser("userId") userId: string,
+    @Query() filters: QueryTransactionsDto,
+  ): Promise<MonthlyStats> {
+    return this.queryBus.execute(new GetMonthlyStatsQuery(userId, filters));
   }
 
   @Get(":id")
