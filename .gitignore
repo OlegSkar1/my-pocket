@@ -28,3 +28,6 @@ next-env.d.ts
 .vscode/
 *.tsbuildinfo
 *.stackdump
+
+# Локальная память Claude Code
+.claude/memory/
