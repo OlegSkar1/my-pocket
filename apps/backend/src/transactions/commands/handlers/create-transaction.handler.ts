@@ -9,6 +9,12 @@ export class CreateTransactionHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет команду создания транзакции.
+   * @param command - команда с `userId` и `dto`
+   * @returns созданная транзакция
+   * @throws {BadRequestException} если `categoryId` не существует
+   */
   execute(command: CreateTransactionCommand): Promise<Transaction> {
     return this.transactionsService.create(command.userId, command.dto);
   }

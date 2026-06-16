@@ -8,6 +8,11 @@ export class DeleteTransactionHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет команду удаления транзакции.
+   * @param command - команда с `id` и `userId`
+   * @throws {NotFoundException} если транзакция не найдена
+   */
   execute(command: DeleteTransactionCommand): Promise<void> {
     return this.transactionsService.delete(command.id, command.userId);
   }

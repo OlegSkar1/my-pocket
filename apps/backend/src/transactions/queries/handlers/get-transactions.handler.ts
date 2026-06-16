@@ -10,6 +10,11 @@ export class GetTransactionsHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет запрос списка транзакций с пагинацией.
+   * @param query - запрос с `userId` и `filters`
+   * @returns постраничный результат с метаданными
+   */
   execute(query: GetTransactionsQuery): Promise<PaginatedResult<Transaction>> {
     return this.transactionsService.findManyByUser(query.userId, query.filters);
   }

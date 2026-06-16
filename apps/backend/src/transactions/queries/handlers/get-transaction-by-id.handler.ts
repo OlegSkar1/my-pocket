@@ -9,6 +9,12 @@ export class GetTransactionByIdHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет запрос одной транзакции по id.
+   * @param query - запрос с `id` и `userId`
+   * @returns найденная транзакция
+   * @throws {NotFoundException} если транзакция не найдена
+   */
   execute(query: GetTransactionByIdQuery): Promise<Transaction> {
     return this.transactionsService.findByIdForUser(query.id, query.userId);
   }

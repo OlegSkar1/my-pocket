@@ -18,6 +18,7 @@
 | Бэкенд | Nest.js (TypeScript) — `apps/backend` |
 | База данных | PostgreSQL (локально — через Docker Compose) |
 | ORM | Prisma (схема и клиент в `apps/backend`) |
+| API-документация | Swagger UI (`@nestjs/swagger`) — `/api/docs` |
 | Общий код | `packages/*` |
 
 ## Структура
@@ -70,3 +71,4 @@ npm run lint                # линт всех воркспейсов
    `npm run prisma:generate --workspace @my-pocket/backend`,
    затем `npm run prisma:migrate --workspace @my-pocket/backend`
 4. Запустить dev-серверы (`npm run dev:backend`, `npm run dev:frontend`)
+5. Swagger UI доступен по адресу `http://localhost:3001/api/docs`

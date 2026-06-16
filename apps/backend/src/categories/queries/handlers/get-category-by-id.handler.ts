@@ -9,6 +9,12 @@ export class GetCategoryByIdHandler
 {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  /**
+   * Выполняет запрос одной категории по id.
+   * @param query - запрос с `id` и `userId`
+   * @returns найденная категория
+   * @throws {NotFoundException} если категория не найдена
+   */
   execute(query: GetCategoryByIdQuery): Promise<Category> {
     return this.categoriesService.findByIdForUser(query.id, query.userId);
   }

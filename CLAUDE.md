@@ -16,12 +16,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 npm workspaces — корневой `package.json` объявляет воркспейсы `apps/*` и `packages/*`; команды запускаются из корня и делегируются через `--workspace`/`--workspaces`.
 
-| Воркспейс | Имя | Назначение | Документация |
-|---|---|---|---|
-| `apps/frontend` | `@my-pocket/frontend` | Next.js (App Router) + Tailwind v4 + shadcn/ui | [apps/frontend/CLAUDE.md](apps/frontend/CLAUDE.md) |
-| `apps/backend` | `@my-pocket/backend` | Nest.js + Prisma + PostgreSQL | [apps/backend/CLAUDE.md](apps/backend/CLAUDE.md) |
-| `packages/shared-types` | `@my-pocket/shared-types` | Общие TS-типы и контракты API | — |
-| `packages/config` | `@my-pocket/config` | Общие базовые конфиги (ESLint base) | — |
+| Воркспейс               | Имя                       | Назначение                                     | Документация                                       |
+| ----------------------- | ------------------------- | ---------------------------------------------- | -------------------------------------------------- |
+| `apps/frontend`         | `@my-pocket/frontend`     | Next.js (App Router) + Tailwind v4 + shadcn/ui | [apps/frontend/CLAUDE.md](apps/frontend/CLAUDE.md) |
+| `apps/backend`          | `@my-pocket/backend`      | Nest.js + Prisma + PostgreSQL                  | [apps/backend/CLAUDE.md](apps/backend/CLAUDE.md)   |
+| `packages/shared-types` | `@my-pocket/shared-types` | Общие TS-типы и контракты API                  | —                                                  |
+| `packages/config`       | `@my-pocket/config`       | Общие базовые конфиги (ESLint base)            | —                                                  |
 
 ### `packages/shared-types`
 
@@ -73,13 +73,13 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/my_pocket?schema=pub
 - Ветка создаётся от актуального `main` (`git checkout -b <name>`).
 - Название — строчными буквами, слова через дефис, с префиксом типа:
 
-| Префикс | Когда использовать |
-|---|---|
-| `feat/` | новая функциональность |
-| `fix/` | исправление бага |
-| `refactor/` | рефакторинг |
-| `docs/` | только документация |
-| `chore/` | конфиги, зависимости, инфраструктура |
+| Префикс     | Когда использовать                   |
+| ----------- | ------------------------------------ |
+| `feat/`     | новая функциональность               |
+| `fix/`      | исправление бага                     |
+| `refactor/` | рефакторинг                          |
+| `docs/`     | только документация                  |
+| `chore/`    | конфиги, зависимости, инфраструктура |
 
 - Пример: `feat/dashboard`, `fix/auth-token-refresh`, `docs/readme-setup`.
 - Коммиты на `main` напрямую **запрещены** — только через Pull Request.
@@ -96,15 +96,15 @@ DATABASE_URL="postgresql://postgres:postgres@localhost:5432/my_pocket?schema=pub
 
 ### Типы
 
-| Тип | Когда использовать |
-|---|---|
-| `feat` | новая функциональность |
-| `fix` | исправление бага |
-| `refactor` | рефакторинг без изменения поведения |
-| `docs` | изменения только в документации |
-| `chore` | настройка инструментов, зависимостей, конфигов |
-| `test` | добавление или исправление тестов |
-| `style` | форматирование, пробелы (без логических изменений) |
+| Тип        | Когда использовать                                 |
+| ---------- | -------------------------------------------------- |
+| `feat`     | новая функциональность                             |
+| `fix`      | исправление бага                                   |
+| `refactor` | рефакторинг без изменения поведения                |
+| `docs`     | изменения только в документации                    |
+| `chore`    | настройка инструментов, зависимостей, конфигов     |
+| `test`     | добавление или исправление тестов                  |
+| `style`    | форматирование, пробелы (без логических изменений) |
 
 ### Скоупы
 
@@ -147,6 +147,7 @@ Scope выбирается по главной затронутой област
 если изменения охватывают несколько областей — выбрать наиболее значимую.
 
 **Body** должен включать:
+
 - `## Что реализовано` — список изменений по областям (backend / frontend);
 - `## Новые API-эндпоинты` — только если добавлены (метод + путь + краткое назначение);
 - `## Тест-план` — чеклист шагов для ручной проверки.
@@ -164,3 +165,8 @@ gh pr create --title "..." --body "$(cat <<'EOF'
 EOF
 )"
 ```
+
+## Документация
+
+При добавлении функционала проверяй .claude/docs/\*.
+Актуализируй файлы при изменении архитектуры или API.
