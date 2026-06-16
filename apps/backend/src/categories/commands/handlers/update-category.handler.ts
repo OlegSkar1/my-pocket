@@ -9,6 +9,13 @@ export class UpdateCategoryHandler
 {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  /**
+   * Выполняет команду обновления категории.
+   * @param command - команда с `id`, `userId` и `dto`
+   * @returns обновлённая категория
+   * @throws {NotFoundException} если категория не найдена
+   * @throws {ConflictException} если новое имя уже занято
+   */
   execute(command: UpdateCategoryCommand): Promise<Category> {
     return this.categoriesService.update(command.id, command.userId, command.dto);
   }

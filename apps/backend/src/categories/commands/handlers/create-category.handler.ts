@@ -9,6 +9,12 @@ export class CreateCategoryHandler
 {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  /**
+   * Выполняет команду создания категории.
+   * @param command - команда с `userId` и `dto`
+   * @returns созданная категория
+   * @throws {ConflictException} если имя уже занято
+   */
   execute(command: CreateCategoryCommand): Promise<Category> {
     return this.categoriesService.create(command.userId, command.dto);
   }

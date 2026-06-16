@@ -9,6 +9,13 @@ export class UpdateTransactionHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет команду обновления транзакции.
+   * @param command - команда с `id`, `userId` и `dto`
+   * @returns обновлённая транзакция
+   * @throws {NotFoundException} если транзакция не найдена
+   * @throws {BadRequestException} если новый `categoryId` не существует
+   */
   execute(command: UpdateTransactionCommand): Promise<Transaction> {
     return this.transactionsService.update(
       command.id,

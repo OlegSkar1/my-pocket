@@ -14,10 +14,21 @@ import { CreateTransactionDto } from "./dto/create-transaction.dto";
 import { UpdateTransactionDto } from "./dto/update-transaction.dto";
 import { QueryTransactionsDto } from "./dto/query-transactions.dto";
 
+/**
+ * Сервис транзакций. Содержит доменную логику:
+ * пагинацию, агрегации, маппинг ошибок Prisma.
+ */
 @Injectable()
 export class TransactionsService {
   constructor(private readonly repo: TransactionsRepository) {}
 
+  /**
+   * Создаёт транзакцию для пользователя.
+   * @param userId - id владельца транзакции
+   * @param dto - данные новой транзакции
+   * @returns созданная транзакция
+   * @throws {BadRequestException} если `categoryId` не существует (Prisma P2003)
+   */
   async create(userId: string, dto: CreateTransactionDto): Promise<Transaction> {
     try {
       return await this.repo.create(userId, dto);
@@ -26,6 +37,12 @@ export class TransactionsService {
     }
   }
 
+  /**
+   * Возвращает постраничный список транзакций пользователя.
+   * @param userId - id владельца
+   * @param filters - параметры фильтрации и пагинации (`page`, `limit`)
+   * @returns объект с массивом транзакций и метаданными (`total`, `page`, `limit`)
+   */
   async findManyByUser(
     userId: string,
     filters: QueryTransactionsDto,
@@ -42,12 +59,28 @@ export class TransactionsService {
     return { items, total, page, limit };
   }
 
+  /**
+   * Ищет транзакцию по id в скоупе пользователя.
+   * @param id - UUID транзакции
+   * @param userId - id владельца (гарантирует изоляцию между пользователями)
+   * @returns найденная транзакция
+   * @throws {NotFoundException} если транзакция не найдена
+   */
   async findByIdForUser(id: string, userId: string): Promise<Transaction> {
     const transaction = await this.repo.findByIdForUser(id, userId);
     if (!transaction) throw new NotFoundException("Транзакция не найдена");
     return transaction;
   }
 
+  /**
+   * Обновляет транзакцию. Предварительно проверяет её существование.
+   * @param id - UUID транзакции
+   * @param userId - id владельца
+   * @param dto - поля для обновления
+   * @returns обновлённая транзакция
+   * @throws {NotFoundException} если транзакция не найдена
+   * @throws {BadRequestException} если новый `categoryId` не существует (Prisma P2003)
+   */
   async update(
     id: string,
     userId: string,
@@ -61,11 +94,24 @@ export class TransactionsService {
     }
   }
 
+  /**
+   * Удаляет транзакцию. Предварительно проверяет её существование.
+   * @param id - UUID транзакции
+   * @param userId - id владельца
+   * @throws {NotFoundException} если транзакция не найдена
+   */
   async delete(id: string, userId: string): Promise<void> {
     await this.findByIdForUser(id, userId);
     await this.repo.delete(id, userId);
   }
 
+  /**
+   * Вычисляет сводку (доходы, расходы, баланс, разбивка по категориям).
+   * Параллельно выполняет агрегацию по типу и по паре (категория, тип).
+   * @param userId - id владельца
+   * @param filters - параметры фильтрации диапазона
+   * @returns `TransactionsSummary` с суммами в строковом представлении `Decimal`
+   */
   async summary(
     userId: string,
     filters: QueryTransactionsDto,
@@ -114,6 +160,12 @@ export class TransactionsService {
     };
   }
 
+  /**
+   * Возвращает помесячную статистику. Пустые месяцы диапазона заполняются нулями.
+   * @param userId - id владельца
+   * @param filters - параметры фильтрации; `dateFrom`/`dateTo` используются для развёртки диапазона
+   * @returns массив `{ month, income, expense }`, отсортированный по возрастанию месяца
+   */
   async monthly(
     userId: string,
     filters: QueryTransactionsDto,
@@ -144,6 +196,11 @@ export class TransactionsService {
     });
   }
 
+  /**
+   * Форматирует дату в ключ `"YYYY-MM"` в UTC.
+   * @param date - дата из результата БД (усечённая до начала месяца)
+   * @returns строка вида `"2024-03"`
+   */
   // Ключ "YYYY-MM" в UTC.
   private monthKey(date: Date): string {
     const year = date.getUTCFullYear();
@@ -151,6 +208,14 @@ export class TransactionsService {
     return `${year}-${month}`;
   }
 
+  /**
+   * Возвращает все месяцы диапазона `dateFrom`→`dateTo` включительно.
+   * Если диапазон не задан — только месяцы, присутствующие в данных.
+   * Используется для заполнения нулями отсутствующих месяцев на гистограмме.
+   * @param filters - содержит `dateFrom` и `dateTo` в формате `"YYYY-MM-DD"`
+   * @param dataKeys - ключи `"YYYY-MM"`, фактически присутствующие в данных
+   * @returns упорядоченный массив ключей месяцев
+   */
   // Все месяцы диапазона dateFrom→dateTo (включительно) для заполнения нулями.
   // Если диапазон не задан — только месяцы, присутствующие в данных.
   private monthRange(
@@ -180,6 +245,11 @@ export class TransactionsService {
     return result;
   }
 
+  /**
+   * Отображает известные ошибки Prisma на HTTP-исключения Nest.
+   * @param err - перехваченная ошибка
+   * @returns `BadRequestException` при нарушении внешнего ключа (P2003), иначе исходная ошибка
+   */
   private mapKnownError(err: unknown): unknown {
     // P2003 — нарушение внешнего ключа (несуществующий categoryId)
     if (

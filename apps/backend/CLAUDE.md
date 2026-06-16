@@ -44,6 +44,7 @@ FRONTEND_URL=http://localhost:3000   # для CORS
 - `app.enableCors({ origin: FRONTEND_URL ?? "http://localhost:3000", credentials: true })`.
 - Глобальный `ValidationPipe({ whitelist: true, transform: true })` — лишние поля DTO срезаются, примитивы кастуются (например, query-string `take`/`skip` в `number`).
 - Порт из `PORT` (дефолт 3001).
+- Swagger UI доступен по `/api/docs` (настраивается через `DocumentBuilder` + `SwaggerModule.setup`).
 
 ## Линтинг
 
@@ -92,6 +93,7 @@ src/
 4. Контроллер — тонкий: только `@UseGuards(JwtAuthGuard)` + `@CurrentUser` + `commandBus.execute`/`queryBus.execute`.
 5. На каждое действие — отдельный command/query + handler. Никаких прямых Prisma-вызовов вне репозитория.
 6. Если контракт публичный — продублируй тип в `@my-pocket/shared-types` и используй его в сигнатуре контроллера.
+7. На каждый новый эндпоинт добавь JSDoc и Swagger-декораторы (см. ниже).
 
 ## API-эндпоинты
 
@@ -162,6 +164,53 @@ npx prisma migrate reset
 - Все исключения Nest (`BadRequestException`, `UnauthorizedException`, `NotFoundException`, `ConflictException`) автоматически отдают `{ statusCode, message, error }`. Фронт парсит `message` (или `message[0]` для массивов от `class-validator`) и показывает в тосте.
 - Сообщения пользователю — **на русском** (как в `AuthService.login`: `"Неверный email или пароль"`).
 - Для гонок и дубликатов используйте `P2002` (unique violation) → `ConflictException`.
+
+## Документация API (JSDoc + Swagger)
+
+### Правило
+
+**При любом изменении эндпоинта** — добавлении, удалении или модификации маршрута, параметров, тела запроса, возвращаемого типа или кодов ответа — нужно синхронно обновить:
+
+1. **JSDoc** на методе контроллера (`@param`, `@returns`, `@throws`).
+2. **Swagger-декораторы** на методе контроллера (`@ApiOperation`, `@ApiResponse`, `@ApiParam` / `@ApiQuery` при необходимости).
+
+Устаревшая документация хуже её отсутствия — она вводит в заблуждение.
+
+### Набор декораторов на контроллере
+
+```typescript
+// На классе контроллера:
+@ApiTags("resource-name")   // группирует эндпоинты в Swagger UI
+@ApiBearerAuth()            // помечает все маршруты как JWT-защищённые
+
+// На каждом методе:
+@ApiOperation({ summary: "Краткое описание" })
+@ApiParam({ name: "id", description: "UUID ресурса" })   // для параметров пути
+@ApiQuery({ name: "page", required: false })             // для query-параметров (если не покрываются DTO)
+@ApiResponse({ status: 200, description: "Успех" })
+@ApiResponse({ status: 400, description: "Невалидные данные" })
+@ApiResponse({ status: 401, description: "Не авторизован" })
+@ApiResponse({ status: 404, description: "Не найдено" })
+```
+
+Все декораторы импортируются из `@nestjs/swagger`.
+
+### JSDoc на методе контроллера
+
+```typescript
+/**
+ * Краткое описание того, что делает эндпоинт.
+ * @param userId - id аутентифицированного пользователя из JWT
+ * @param dto - тело запроса / фильтры
+ * @returns описание возвращаемого значения
+ * @throws {NotFoundException} при каком условии
+ * @throws {BadRequestException} при каком условии
+ */
+```
+
+### JSDoc на методах сервиса и репозитория
+
+При изменении сигнатуры метода сервиса или репозитория обновляй JSDoc там же: `@param`, `@returns`, `@throws`.
 
 ## Тестирование
 

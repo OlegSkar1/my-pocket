@@ -11,12 +11,23 @@ interface MonthlyRow {
   sum: Prisma.Decimal;
 }
 
+/**
+ * Преобразует строку `"YYYY-MM-DD"` в начало этого дня в UTC.
+ * @param dateStr - дата в формате ISO 8601 без времени
+ * @returns `Date` для `00:00:00.000 UTC` указанного дня
+ */
 // "YYYY-MM-DD" → начало этого дня в UTC. Без этого new Date("YYYY-MM-DD")
 // уже даёт 00:00 UTC, но мы оборачиваем явно для симметрии с next-day.
 function startOfDayUtc(dateStr: string): Date {
   return new Date(`${dateStr}T00:00:00.000Z`);
 }
 
+/**
+ * Преобразует строку `"YYYY-MM-DD"` в начало следующего дня в UTC.
+ * Используется как верхняя полуоткрытая граница, чтобы `dateTo` был включительным.
+ * @param dateStr - дата в формате ISO 8601 без времени
+ * @returns `Date` для `00:00:00.000 UTC` дня, следующего за указанным
+ */
 // "YYYY-MM-DD" → начало следующего дня в UTC. Используется как верхняя
 // полуоткрытая граница, чтобы dateTo был включительным.
 function startOfNextDayUtc(dateStr: string): Date {
@@ -25,14 +36,33 @@ function startOfNextDayUtc(dateStr: string): Date {
   return d;
 }
 
+/**
+ * Репозиторий транзакций. Единственное место, где используется `PrismaService`
+ * для доступа к таблице `Transaction`.
+ */
 @Injectable()
 export class TransactionsRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Создаёт запись транзакции.
+   * @param userId - id владельца
+   * @param dto - поля новой транзакции
+   * @returns созданная запись
+   */
   create(userId: string, dto: CreateTransactionDto): Promise<Transaction> {
     return this.prisma.transaction.create({ data: { ...dto, userId } });
   }
 
+  /**
+   * Возвращает страницу транзакций пользователя с общим счётчиком.
+   * Запросы на выборку и count выполняются параллельно.
+   * @param userId - id владельца
+   * @param filters - критерии фильтрации
+   * @param skip - количество записей для пропуска (offset)
+   * @param take - максимальное количество записей в ответе
+   * @returns объект `{ items, total }`
+   */
   async findManyByUser(
     userId: string,
     filters: QueryTransactionsDto,
@@ -52,10 +82,23 @@ export class TransactionsRepository {
     return { items, total };
   }
 
+  /**
+   * Ищет транзакцию по id в скоупе пользователя.
+   * @param id - UUID транзакции
+   * @param userId - id владельца (исключает чужие транзакции)
+   * @returns транзакция или `null`, если не найдена
+   */
   findByIdForUser(id: string, userId: string): Promise<Transaction | null> {
     return this.prisma.transaction.findFirst({ where: { id, userId } });
   }
 
+  /**
+   * Обновляет поля транзакции. Условие `{ id, userId }` гарантирует изоляцию.
+   * @param id - UUID транзакции
+   * @param userId - id владельца
+   * @param dto - поля для обновления
+   * @returns обновлённая транзакция
+   */
   update(
     id: string,
     userId: string,
@@ -64,10 +107,22 @@ export class TransactionsRepository {
     return this.prisma.transaction.update({ where: { id, userId }, data: dto });
   }
 
+  /**
+   * Удаляет транзакцию. Условие `{ id, userId }` гарантирует изоляцию.
+   * @param id - UUID транзакции
+   * @param userId - id владельца
+   * @returns удалённая запись
+   */
   delete(id: string, userId: string): Promise<Transaction> {
     return this.prisma.transaction.delete({ where: { id, userId } });
   }
 
+  /**
+   * Агрегирует транзакции по типу (`INCOME` / `EXPENSE`).
+   * @param userId - id владельца
+   * @param filters - критерии фильтрации
+   * @returns массив строк `{ type, _sum.amount, _count._all }`
+   */
   groupByType(userId: string, filters: QueryTransactionsDto) {
     return this.prisma.transaction.groupBy({
       by: ["type"],
@@ -77,6 +132,12 @@ export class TransactionsRepository {
     });
   }
 
+  /**
+   * Агрегирует транзакции по паре (категория, тип).
+   * @param userId - id владельца
+   * @param filters - критерии фильтрации
+   * @returns массив строк `{ categoryId, type, _sum.amount, _count._all }`
+   */
   groupByCategoryAndType(userId: string, filters: QueryTransactionsDto) {
     return this.prisma.transaction.groupBy({
       by: ["categoryId", "type"],
@@ -86,6 +147,13 @@ export class TransactionsRepository {
     });
   }
 
+  /**
+   * Помесячная агрегация для гистограммы через сырой SQL.
+   * Динамический WHERE параметризован через `Prisma.sql`/`Prisma.join` — без `$queryRawUnsafe`.
+   * @param userId - id владельца
+   * @param filters - критерии фильтрации (тип, категории, диапазон дат)
+   * @returns массив строк `{ month, type, sum }`, где `month` усечён до начала месяца UTC
+   */
   // Помесячная агрегация для гистограммы. Динамический WHERE параметризован
   // через Prisma.sql/Prisma.join — без $queryRawUnsafe.
   groupByMonth(
@@ -119,6 +187,13 @@ export class TransactionsRepository {
     `);
   }
 
+  /**
+   * Строит объект `Prisma.TransactionWhereInput` на основе фильтров.
+   * Даты преобразуются в полуоткрытый интервал UTC: `[dateFrom, dateTo+1)`.
+   * @param userId - id владельца (обязательный скоуп)
+   * @param filters - параметры фильтрации
+   * @returns объект условий для передачи в Prisma-запросы
+   */
   private buildWhere(
     userId: string,
     filters: QueryTransactionsDto,

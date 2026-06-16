@@ -9,6 +9,11 @@ export class GetTransactionsSummaryHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет запрос сводки по транзакциям.
+   * @param query - запрос с `userId` и `filters`
+   * @returns агрегированная сводка доходов, расходов и баланса
+   */
   execute(query: GetTransactionsSummaryQuery): Promise<TransactionsSummary> {
     return this.transactionsService.summary(query.userId, query.filters);
   }

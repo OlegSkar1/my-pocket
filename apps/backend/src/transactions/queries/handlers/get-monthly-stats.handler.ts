@@ -9,6 +9,11 @@ export class GetMonthlyStatsHandler
 {
   constructor(private readonly transactionsService: TransactionsService) {}
 
+  /**
+   * Выполняет запрос помесячной статистики.
+   * @param query - запрос с `userId` и `filters`
+   * @returns массив `{ month, income, expense }` за каждый месяц диапазона
+   */
   execute(query: GetMonthlyStatsQuery): Promise<MonthlyStats> {
     return this.transactionsService.monthly(query.userId, query.filters);
   }

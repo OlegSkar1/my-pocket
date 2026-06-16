@@ -9,6 +9,11 @@ export class GetCategoriesHandler
 {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  /**
+   * Выполняет запрос списка категорий пользователя.
+   * @param query - запрос с `userId`
+   * @returns массив категорий
+   */
   execute(query: GetCategoriesQuery): Promise<Category[]> {
     return this.categoriesService.findManyByUser(query.userId);
   }

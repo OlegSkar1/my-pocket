@@ -7,6 +7,12 @@ import { UsersService } from "../../users.service";
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand, User> {
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * Выполняет команду создания пользователя.
+   * @param command - команда с именем, email и хешем пароля
+   * @returns созданный пользователь
+   * @throws {ConflictException} если email уже занят
+   */
   execute(command: CreateUserCommand): Promise<User> {
     return this.usersService.create({
       name: command.name,
