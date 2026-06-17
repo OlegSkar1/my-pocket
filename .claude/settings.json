@@ -1,6 +1,12 @@
 {
   "permissions": {
-    "allow": ["Bash(npm test)", "Bash(git *)", "Bash(npm i *)", "Read(*)"],
+    "allow": [
+      "Bash(npm test)",
+      "Bash(git *)",
+      "Bash(npm i *)",
+      "Read(*)",
+      "Bash(gh *)"
+    ],
     "deny": ["Read(**/.env)"]
   }
 }
