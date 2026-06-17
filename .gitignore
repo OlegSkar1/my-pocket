@@ -31,3 +31,6 @@ next-env.d.ts
 
 # Локальная память Claude Code
 .claude/memory/
+
+# Стенд-апы
+standups/
