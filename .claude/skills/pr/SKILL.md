@@ -3,22 +3,31 @@ name: pr
 description: Создать Pull Request по правилам проекта. Использовать только вручную после /push.
 allowed-tools: Bash(git log *) Bash(git diff *) Bash(git branch *) Bash(gh pr create *)
 model: sonnet
-effort: low
+argument-hint: [title] [base-branch, default main]
 ---
+
+## Аргументы
+
+- $0 - название PR
+- $1 - ветка, в которую мержить (по умолчанию main)
 
 ## Подготовка
 
-Изучи изменения ветки относительно `main`:
+Базовая ветка — `$1` (если не передан, использовать `main`).
+
+Изучи изменения ветки относительно базовой:
 
 ```bash
-git log main..HEAD --oneline          # коммиты ветки
-git diff main --stat                  # затронутые файлы
-git diff main -- <файл>               # детали конкретного файла
+git log <base-branch>..HEAD --oneline          # коммиты ветки
+git diff <base-branch> --stat                  # затронутые файлы
+git diff <base-branch> -- <файл>               # детали конкретного файла
 ```
 
 ## Заголовок PR
 
-По Conventional Commits: `feat(scope): описание на русском`.
+Если передан `$0` — использовать его как заголовок без изменений.
+
+Если `$0` не передан — сформировать по Conventional Commits: `feat(scope): описание на русском`.
 
 Scope — главная затронутая область (`frontend`, `backend`, `transactions` и т. д.); если изменения охватывают несколько областей — выбрать наиболее значимую.
 
@@ -33,7 +42,7 @@ Scope — главная затронутая область (`frontend`, `backe
 ## Создание PR
 
 ```bash
-gh pr create --title "feat(scope): описание" --body "$(cat <<'EOF'
+gh pr create --title "<title>" --base <base-branch> --body "$(cat <<'EOF'
 ## Что реализовано
 ...
 
