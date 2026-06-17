@@ -3,22 +3,33 @@ name: pr
 description: Создать Pull Request по правилам проекта. Использовать только вручную после /push.
 allowed-tools: Bash(git log *) Bash(git diff *) Bash(git branch *) Bash(gh pr create *)
 model: sonnet
-effort: low
+argument-hint: [base-branch] [title...]
 ---
+
+## Аргументы
+
+- `$0` — базовая ветка (одно слово, по умолчанию `main`)
+- `$1 $2 $3 ...` — название PR (все слова после первого, может содержать пробелы)
+
+Если `$0` выглядит как ветка (одно слово без пробелов, совпадает с `main`, `dev` или шаблоном `prefix/name`) — это base-branch, а заголовок собирается из оставшихся слов. Если ничего не передано — base-branch = `main`, заголовок генерируется автоматически.
 
 ## Подготовка
 
-Изучи изменения ветки относительно `main`:
+Базовая ветка — `$0` (если не передан или не похож на ветку — использовать `main`).
+
+Изучи изменения ветки относительно базовой:
 
 ```bash
-git log main..HEAD --oneline          # коммиты ветки
-git diff main --stat                  # затронутые файлы
-git diff main -- <файл>               # детали конкретного файла
+git log <base-branch>..HEAD --oneline          # коммиты ветки
+git diff <base-branch> --stat                  # затронутые файлы
+git diff <base-branch> -- <файл>               # детали конкретного файла
 ```
 
 ## Заголовок PR
 
-По Conventional Commits: `feat(scope): описание на русском`.
+Если заголовок передан через аргументы (`$1 $2 $3 ...`) — использовать как есть, объединив слова пробелами.
+
+Если заголовок не передан — сформировать по Conventional Commits: `feat(scope): описание на русском`.
 
 Scope — главная затронутая область (`frontend`, `backend`, `transactions` и т. д.); если изменения охватывают несколько областей — выбрать наиболее значимую.
 
@@ -33,7 +44,7 @@ Scope — главная затронутая область (`frontend`, `backe
 ## Создание PR
 
 ```bash
-gh pr create --title "feat(scope): описание" --body "$(cat <<'EOF'
+gh pr create --title "<title>" --base <base-branch> --body "$(cat <<'EOF'
 ## Что реализовано
 ...
 
