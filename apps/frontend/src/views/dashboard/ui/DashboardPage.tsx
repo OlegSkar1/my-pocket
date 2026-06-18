@@ -29,20 +29,32 @@ export function DashboardPage() {
         <MobileHeader />
 
         <main className="mx-auto w-full max-w-6xl flex-1 space-y-6 p-4 md:p-6">
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">
+                Аналитика финансов
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Доходы, расходы и динамика за период
+              </p>
+            </div>
+            <Button className="gap-2" onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Добавить
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
             <PeriodFilter />
             <CategoryFilter />
             <Button
               variant="ghost"
+              size="sm"
               className="gap-2 text-muted-foreground"
               onClick={resetFilters}
             >
               <RotateCcw className="h-4 w-4" />
               Сбросить
-            </Button>
-            <Button className="ml-auto gap-2" onClick={() => setCreateOpen(true)}>
-              <Plus className="h-4 w-4" />
-              Добавить
             </Button>
           </div>
 

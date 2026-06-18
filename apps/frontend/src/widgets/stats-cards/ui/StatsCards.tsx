@@ -1,10 +1,10 @@
 "use client";
 
-import { ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useTransactionsSummary } from "@/entities/transaction";
 import { useFiltersStore, useStatsFilters } from "@/features/transaction-filters";
 import { cn, formatMoney } from "@/shared/lib";
-import { Card, CardContent } from "@/shared/ui/card";
+import { Card } from "@/shared/ui/card";
 import { Skeleton } from "@/shared/ui/skeleton";
 
 export function StatsCards() {
@@ -18,22 +18,19 @@ export function StatsCards() {
       type: "EXPENSE" as const,
       title: "Расходы",
       amount: data?.totalExpense,
-      icon: ArrowDownCircle,
-      accent: "text-chart-expense",
+      dot: "bg-chart-expense",
     },
     {
       type: "INCOME" as const,
       title: "Доходы",
       amount: data?.totalIncome,
-      icon: ArrowUpCircle,
-      accent: "text-chart-income",
+      dot: "bg-chart-income",
     },
   ];
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {cards.map((card) => {
-        const Icon = card.icon;
         const active =
           selection?.kind === "card" && selection.type === card.type;
         return (
@@ -46,23 +43,22 @@ export function StatsCards() {
               if (e.key === "Enter" || e.key === " ") selectCard(card.type);
             }}
             className={cn(
-              "cursor-pointer transition hover:border-ring",
-              active && "border-ring ring-2 ring-ring",
+              "group cursor-pointer p-5 transition hover:border-ring/40",
+              active && "border-ring ring-2 ring-ring/60",
             )}
           >
-            <CardContent className="flex items-center justify-between gap-4 p-5">
-              <div>
-                <p className="text-sm text-muted-foreground">{card.title}</p>
-                {isLoading ? (
-                  <Skeleton className="mt-2 h-7 w-32" />
-                ) : (
-                  <p className="mt-1 text-2xl font-semibold">
-                    {formatMoney(card.amount ?? "0")}
-                  </p>
-                )}
-              </div>
-              <Icon className={cn("h-8 w-8", card.accent)} />
-            </CardContent>
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+              <span className={cn("h-2.5 w-2.5 rounded-full", card.dot)} />
+              {card.title}
+              <ChevronRight className="h-4 w-4 opacity-0 transition group-hover:opacity-100" />
+            </div>
+            {isLoading ? (
+              <Skeleton className="mt-3 h-9 w-40" />
+            ) : (
+              <p className="tnum mt-2 text-3xl font-extrabold tracking-tight">
+                {formatMoney(card.amount ?? "0")}
+              </p>
+            )}
           </Card>
         );
       })}

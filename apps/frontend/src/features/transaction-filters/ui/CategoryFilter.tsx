@@ -1,6 +1,6 @@
 "use client";
 
-import { ListFilter } from "lucide-react";
+import { ChevronDown, ListFilter } from "lucide-react";
 import { useCategories } from "@/entities/category";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
@@ -29,8 +29,9 @@ export function CategoryFilter() {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className="justify-start gap-2 font-normal">
-          <ListFilter className="h-4 w-4" />
+          <ListFilter className="h-4 w-4 text-muted-foreground" />
           {label}
+          <ChevronDown className="h-4 w-4 text-muted-foreground" />
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="max-h-80 overflow-y-auto">

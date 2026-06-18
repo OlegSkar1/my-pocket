@@ -31,16 +31,29 @@ export function CategoriesPanel() {
     return map;
   }, [categories]);
 
+  // Какой тип показываем: выбранная карточка (Расходы/Доходы), иначе — расходы.
+  const activeType =
+    selection?.kind === "card" ? selection.type : "EXPENSE";
+
   const rows = useMemo(() => {
     if (!summary) return [];
     return summary.byCategory
       .map((row) => {
         const category = categoryMap.get(row.categoryId);
-        const total = Number(row.totalExpense) + Number(row.totalIncome);
+        const total =
+          activeType === "EXPENSE"
+            ? Number(row.totalExpense)
+            : Number(row.totalIncome);
         return { ...row, category, total };
       })
+      .filter((row) => row.total > 0)
       .sort((a, b) => b.total - a.total);
-  }, [summary, categoryMap]);
+  }, [summary, categoryMap, activeType]);
+
+  const grandTotal =
+    activeType === "EXPENSE"
+      ? Number(summary?.totalExpense ?? 0)
+      : Number(summary?.totalIncome ?? 0);
 
   const openCreate = () => {
     setEditing(null);
@@ -54,23 +67,40 @@ export function CategoriesPanel() {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle>Категории</CardTitle>
+        <CardTitle>
+          {activeType === "EXPENSE" ? "Расходы" : "Доходы"} по категориям
+        </CardTitle>
         <Button variant="ghost" size="icon" onClick={openCreate} aria-label="Добавить категорию">
           <Plus className="h-5 w-5" />
         </Button>
       </CardHeader>
       <CardContent className="space-y-2">
+        {/* Сигнатурная лента: доли категорий одним взглядом — «куда ушли деньги». */}
+        {rows.length > 0 && grandTotal > 0 && (
+          <div className="mb-4 flex h-2.5 gap-0.5 overflow-hidden rounded-full">
+            {rows.map((row) => (
+              <span
+                key={row.categoryId}
+                className="h-full first:rounded-l-full last:rounded-r-full"
+                style={{
+                  width: `${percent(row.total, grandTotal)}%`,
+                  background: row.category?.color ?? "#9aa0ad",
+                }}
+              />
+            ))}
+          </div>
+        )}
         {isLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-12 w-full" />
           ))
         ) : rows.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            Нет операций за период
+            Нет {activeType === "EXPENSE" ? "расходов" : "доходов"} за период
           </p>
         ) : (
           rows.map((row) => {
-            const share = percent(row.total, Number(summary?.totalExpense ?? 0) + Number(summary?.totalIncome ?? 0));
+            const share = percent(row.total, grandTotal);
             const active =
               selection?.kind === "category" &&
               selection.categoryId === row.categoryId;
@@ -78,8 +108,8 @@ export function CategoriesPanel() {
               <div
                 key={row.categoryId}
                 className={cn(
-                  "group flex items-center gap-3 rounded-md px-2 py-2 transition hover:bg-accent",
-                  active && "bg-accent",
+                  "group flex items-center gap-3 rounded-xl px-2 py-2 transition hover:bg-muted",
+                  active && "bg-muted",
                 )}
               >
                 <button
@@ -87,8 +117,8 @@ export function CategoriesPanel() {
                   className="flex min-w-0 flex-1 items-center gap-3 text-left"
                 >
                   <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg"
-                    style={{ backgroundColor: `${row.category?.color ?? "#888"}33` }}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-lg"
+                    style={{ backgroundColor: `${row.category?.color ?? "#888"}22` }}
                   >
                     {row.category?.icon ?? "📦"}
                   </span>
@@ -100,7 +130,7 @@ export function CategoriesPanel() {
                       {row.transactionCount} оп. · {share.toFixed(0)}%
                     </p>
                   </div>
-                  <span className="shrink-0 text-sm font-medium">
+                  <span className="tnum shrink-0 text-sm font-semibold">
                     {formatMoney(row.total)}
                   </span>
                 </button>
