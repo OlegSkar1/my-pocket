@@ -30,7 +30,7 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {user && (
-        <div className="mt-2 rounded-md bg-accent px-3 py-2">
+        <div className="mt-2 rounded-xl bg-muted px-3 py-2">
           <p className="truncate font-medium">{user.name}</p>
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         </div>
@@ -45,8 +45,8 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               href={href}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm transition hover:bg-accent",
-                active && "bg-accent font-medium",
+                "flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted hover:text-foreground",
+                active && "bg-accent font-medium text-accent-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
               <Icon className="h-4 w-4" />

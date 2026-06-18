@@ -104,11 +104,11 @@ export function TransactionsList() {
                 <button
                   key={transaction.id}
                   onClick={() => openEdit(transaction)}
-                  className="flex w-full items-center gap-3 rounded-md px-2 py-2 text-left transition hover:bg-accent"
+                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition hover:bg-muted"
                 >
                   <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-lg"
-                    style={{ backgroundColor: `${category?.color ?? "#888"}33` }}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-lg"
+                    style={{ backgroundColor: `${category?.color ?? "#888"}22` }}
                   >
                     {category?.icon ?? "💸"}
                   </span>
@@ -122,12 +122,14 @@ export function TransactionsList() {
                       })}
                     </p>
                   </div>
-                  <span
-                    className={cn(
-                      "shrink-0 font-semibold",
-                      isExpense ? "text-chart-expense" : "text-chart-income",
-                    )}
-                  >
+                  {/* Сумма — чернилами; цвет несёт только точка-маркер слева от знака. */}
+                  <span className="tnum flex shrink-0 items-center gap-1.5 font-semibold">
+                    <span
+                      className={cn(
+                        "h-1.5 w-1.5 rounded-full",
+                        isExpense ? "bg-chart-expense" : "bg-chart-income",
+                      )}
+                    />
                     {isExpense ? "−" : "+"}
                     {formatMoney(transaction.amount)}
                   </span>

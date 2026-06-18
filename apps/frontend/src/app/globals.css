@@ -4,68 +4,84 @@
    чтобы переключать её вручную. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Светлая тема — значения по умолчанию.
-   Палитра в духе Ozon: электрик-синий #005BFF + насыщенный розовый. */
+/* Дизайн-язык вдохновлён PFM-аналитикой Ozon Банка: спокойный, «не давит
+   цифрами». Суммы — чернильным foreground, цвет несёт только точка-маркер,
+   график и иконки категорий. Фон холодно-серый, карточки белые с крупным
+   радиусом; столбцы графика пастельные, акцент — только текущий период. */
 :root {
-  --background: #f5f6f8;
-  --foreground: #0a0b12;
+  --background: #f1f2f6;
+  --foreground: #15161c;
 
   --card: #ffffff;
-  --card-foreground: #0a0b12;
+  --card-foreground: #15161c;
 
-  --primary: #005bff;
+  /* Вложенный блок внутри карточки (как «капсулы» в референсе). */
+  --muted: #f3f4f8;
+  --muted-foreground: #8a8f9d;
+
+  --primary: #4e5df5;
   --primary-foreground: #ffffff;
 
-  --secondary: #eef1f6;
-  --secondary-foreground: #0a0b12;
+  --secondary: #eef0f6;
+  --secondary-foreground: #15161c;
 
-  --muted: #eef1f6;
-  --muted-foreground: #6b7280;
+  --accent: #ecedfb;
+  --accent-foreground: #3a47d6;
 
-  --accent: #e6efff;
-  --accent-foreground: #005bff;
-
-  --destructive: #f91155;
+  --destructive: #f0436a;
   --destructive-foreground: #ffffff;
 
-  --border: #e4e7ec;
-  --input: #e4e7ec;
-  --ring: #005bff;
+  --border: #e6e8f0;
+  --input: #e6e8f0;
+  --ring: #4e5df5;
 
-  /* Акценты для графиков и сумм. */
-  --chart-expense: #f91155; /* розовый — расход */
-  --chart-income: #005bff; /* синий — доход */
+  /* Расход = розовый, доход = синий — насыщенные тона для точек-маркеров,
+     текущего столбца и сегментов ленты. */
+  --chart-expense: #fb4e8b;
+  --chart-income: #5c7cfa;
+  /* Пастельные версии — для «спящих» столбцов графика (не давят). */
+  --chart-expense-soft: #f8cadc;
+  --chart-income-soft: #cfd8fb;
+
+  /* Дельты «больше/меньше, чем …». */
+  --positive: #12a150;
+  --negative: #f0436a;
 }
 
-/* Тёмная тема — основная для финтех-вида: near-black + яркие акценты. */
+/* Тёмная тема — тот же спокойный язык, приглушённые насыщенности. */
 .dark {
-  --background: #08090d;
-  --foreground: #f4f5fa;
+  --background: #0c0d12;
+  --foreground: #f2f3f8;
 
-  --card: #14161d;
-  --card-foreground: #f4f5fa;
+  --card: #15171f;
+  --card-foreground: #f2f3f8;
 
-  --primary: #2f6bff;
+  --muted: #1b1d27;
+  --muted-foreground: #8c92a3;
+
+  --primary: #6d7bff;
   --primary-foreground: #ffffff;
 
-  --secondary: #1b1d26;
-  --secondary-foreground: #f4f5fa;
+  --secondary: #1b1d27;
+  --secondary-foreground: #f2f3f8;
 
-  --muted: #1b1d26;
-  --muted-foreground: #9197a6;
+  --accent: #1d2138;
+  --accent-foreground: #aab4ff;
 
-  --accent: #16203a;
-  --accent-foreground: #6ea0ff;
-
-  --destructive: #ff2d6f;
+  --destructive: #ff4d77;
   --destructive-foreground: #ffffff;
 
-  --border: #262833;
-  --input: #1f2129;
-  --ring: #2f6bff;
+  --border: #262934;
+  --input: #20222c;
+  --ring: #6d7bff;
 
-  --chart-expense: #ff3d7f;
-  --chart-income: #2f6bff;
+  --chart-expense: #ff5c9a;
+  --chart-income: #7088ff;
+  --chart-expense-soft: #3a2330;
+  --chart-income-soft: #1f2742;
+
+  --positive: #2dd47f;
+  --negative: #ff5c7c;
 }
 
 /* Маппинг CSS-переменных в дизайн-токены Tailwind.
@@ -98,12 +114,18 @@
 
   --color-chart-expense: var(--chart-expense);
   --color-chart-income: var(--chart-income);
+  --color-chart-expense-soft: var(--chart-expense-soft);
+  --color-chart-income-soft: var(--chart-income-soft);
 
-  /* Крупные скругления — современный вид. */
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
+  --color-positive: var(--positive);
+  --color-negative: var(--negative);
+
+  /* Крупные мягкие скругления — узнаваемый «капсульный» вид PFM. */
+  --radius-sm: 0.625rem;
+  --radius-md: 0.875rem;
   --radius-lg: 1.25rem;
-  --radius-xl: 1.75rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
 
   /* Современный геометрический гротеск (подключается в layout). */
   --font-sans: var(--font-manrope), system-ui, -apple-system, sans-serif;
@@ -162,5 +184,10 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+  /* Денежные суммы — моноширинные цифры, чтобы не «прыгали» при изменении. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
   }
 }
