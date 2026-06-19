@@ -1,4 +1,4 @@
----
+﻿---
 name: merge
 description: Смержить текущий PR в main, проведя проверки по чеклисту REVIEW.md. Использовать только вручную после /pr.
 allowed-tools: Bash(git *) Bash(gh *) Bash(npm *)

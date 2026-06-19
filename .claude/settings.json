@@ -1,17 +1,27 @@
 {
-  "permissions": {
-    "allow": [
-      "Bash(npm test)",
-      "Bash(git *)",
-      "Bash(npm i *)",
-      "Read(*)",
-      "Bash(gh *)"
-    ],
-    "deny": [
-      "Read(**/.env)"
-    ]
-  },
-  "enabledPlugins": {
-    "frontend-design@claude-plugins-official": true
-  }
+	"permissions": {
+		"allow": ["Bash(npm test)", "Bash(git *)", "Bash(npm i *)", "Read(*)", "Bash(gh *)"],
+		"deny": ["Read(**/.env)"]
+	},
+	"enabledPlugins": {
+		"frontend-design@claude-plugins-official": true
+	},
+
+	"hooks": {
+		"PostToolUse": [
+			{
+				"matcher": "Edit|Write",
+				"hooks": [
+					{
+						"type": "command",
+						"command": "jq -r '.tool_input.file_path' | xargs npx prettier --write"
+					},
+					{
+						"type": "command",
+						"command": "jq -r '.tool_input.file_path' | { read -r f; echo \"$f\" | grep -qE '\\.(ts|tsx)$' && npx eslint --flag v10_config_lookup_from_file --fix \"$f\"; } 2>/dev/null || true"
+					}
+				]
+			}
+		]
+	}
 }
