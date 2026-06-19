@@ -1,4 +1,4 @@
----
+﻿---
 name: stand-up
 description: Собрать изменения за последние 24 часа и выдать краткий стенд-ап для руководства.
 allowed-tools: Bash(git log *) Bash(git diff *) Bash(git show *) Bash(git branch *) Bash(date *) Write(standups/*)

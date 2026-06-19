@@ -1,4 +1,4 @@
----
+﻿---
 name: push
 description: Запушить текущую ветку на remote. Использовать только вручную после /commit.
 allowed-tools: Bash(git branch *) Bash(git push *) Bash(git status *) Bash(git log *)
