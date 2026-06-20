@@ -1,27 +1,27 @@
 {
-  "name": "my-pocket",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Трекер расходов — монорепозиторий (Next.js + Nest.js + Prisma/PostgreSQL)",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "engines": {
-    "node": ">=20"
-  },
-  "scripts": {
-    "dev:frontend": "npm run dev --workspace @my-pocket/frontend",
-    "dev:backend": "npm run start:dev --workspace @my-pocket/backend",
-    "db:up": "docker compose up -d",
-    "db:down": "docker compose down",
-    "db:reset": "docker compose down -v",
-    "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
-    "format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,css,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,css,md}\""
-  },
-  "devDependencies": {
-    "prettier": "^3.5.0"
-  }
+	"name": "my-pocket",
+	"version": "0.1.0",
+	"private": true,
+	"description": "Трекер расходов — монорепозиторий (Next.js + Nest.js + Prisma/PostgreSQL)",
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"engines": {
+		"node": ">=20"
+	},
+	"scripts": {
+		"dev:frontend": "npm run dev --workspace @my-pocket/frontend",
+		"dev:backend": "npm run start:dev --workspace @my-pocket/backend",
+		"db:up": "docker compose up -d",
+		"db:down": "docker compose down",
+		"db:reset": "docker compose down -v",
+		"build": "npm run build --workspaces --if-present",
+		"lint": "npm run lint --workspaces --if-present",
+		"format": "prettier --write \"**/*.{ts,tsx,js,mjs,json,css,md}\"",
+		"format:check": "prettier --check \"**/*.{ts,tsx,js,mjs,json,css,md}\""
+	},
+	"devDependencies": {
+		"prettier": "^3.5.0"
+	}
 }
