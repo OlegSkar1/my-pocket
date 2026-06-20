@@ -2,7 +2,13 @@
 	"mcpServers": {
 		"dbhub": {
 			"type": "http",
-			"url": "${DBHUB_URL}"
+			"url": "http://localhost:8080/mcp"
+		},
+		"playwright": {
+			"type": "stdio",
+			"command": "npx",
+			"args": ["@playwright/mcp@latest"],
+			"env": {}
 		}
 	}
 }
