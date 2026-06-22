@@ -34,3 +34,6 @@ next-env.d.ts
 
 # Стенд-апы
 standups/
+
+# Playwright MCP артефакты
+.playwright-mcp/
