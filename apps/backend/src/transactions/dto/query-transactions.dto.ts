@@ -42,12 +42,13 @@ export class QueryTransactionsDto {
 	@IsUUID('4', { each: true })
 	categoryIds?: string[];
 
+	// Дефолты (page=1, limit=10) применяются в TransactionsService — единый источник.
 	@ApiPropertyOptional({ example: 1, description: 'Номер страницы (от 1)', default: 1 })
 	@IsOptional()
 	@Type(() => Number)
 	@IsInt()
 	@Min(1)
-	page?: number = 1;
+	page?: number;
 
 	@ApiPropertyOptional({ example: 10, description: 'Размер страницы (1–100)', default: 10 })
 	@IsOptional()
@@ -55,5 +56,5 @@ export class QueryTransactionsDto {
 	@IsInt()
 	@Min(1)
 	@Max(100)
-	limit?: number = 10;
+	limit?: number;
 }

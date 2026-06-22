@@ -16,8 +16,7 @@ interface MonthlyRow {
  * @param dateStr - дата в формате ISO 8601 без времени
  * @returns `Date` для `00:00:00.000 UTC` указанного дня
  */
-// "YYYY-MM-DD" → начало этого дня в UTC. Без этого new Date("YYYY-MM-DD")
-// уже даёт 00:00 UTC, но мы оборачиваем явно для симметрии с next-day.
+// "YYYY-MM-DD" → начало этого дня в UTC (явная форма, симметрично startOfNextDayUtc).
 function startOfDayUtc(dateStr: string): Date {
 	return new Date(`${dateStr}T00:00:00.000Z`);
 }

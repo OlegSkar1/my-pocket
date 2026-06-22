@@ -57,16 +57,15 @@ export class TransactionsService {
 	}
 
 	/**
-	 * Обновляет транзакцию. Предварительно проверяет её существование.
+	 * Обновляет транзакцию в скоупе пользователя.
 	 * @param id - UUID транзакции
 	 * @param userId - id владельца
 	 * @param dto - поля для обновления
 	 * @returns обновлённая транзакция
-	 * @throws {NotFoundException} если транзакция не найдена
+	 * @throws {NotFoundException} если транзакция не найдена (Prisma P2025)
 	 * @throws {BadRequestException} если новый `categoryId` не существует (Prisma P2003)
 	 */
 	async update(id: string, userId: string, dto: UpdateTransactionDto): Promise<Transaction> {
-		await this.findByIdForUser(id, userId);
 		try {
 			return await this.repo.update(id, userId, dto);
 		} catch (err) {
@@ -75,14 +74,17 @@ export class TransactionsService {
 	}
 
 	/**
-	 * Удаляет транзакцию. Предварительно проверяет её существование.
+	 * Удаляет транзакцию в скоупе пользователя.
 	 * @param id - UUID транзакции
 	 * @param userId - id владельца
-	 * @throws {NotFoundException} если транзакция не найдена
+	 * @throws {NotFoundException} если транзакция не найдена (Prisma P2025)
 	 */
 	async delete(id: string, userId: string): Promise<void> {
-		await this.findByIdForUser(id, userId);
-		await this.repo.delete(id, userId);
+		try {
+			await this.repo.delete(id, userId);
+		} catch (err) {
+			throw this.mapKnownError(err);
+		}
 	}
 
 	/**
@@ -118,12 +120,15 @@ export class TransactionsService {
 			totalExpense: totalExpense.toFixed(2),
 			balance: totalIncome.sub(totalExpense).toFixed(2),
 			transactionCount,
-			byCategory: [...categories.entries()].map(([categoryId, sums]) => ({
-				categoryId,
-				totalIncome: sums.income.toFixed(2),
-				totalExpense: sums.expense.toFixed(2),
-				transactionCount: sums.count,
-			})),
+			// Сортируем по categoryId — порядок ключей Map недетерминирован относительно БД.
+			byCategory: [...categories.entries()]
+				.sort(([a], [b]) => a.localeCompare(b))
+				.map(([categoryId, sums]) => ({
+					categoryId,
+					totalIncome: sums.income.toFixed(2),
+					totalExpense: sums.expense.toFixed(2),
+					transactionCount: sums.count,
+				})),
 		};
 	}
 
@@ -206,12 +211,16 @@ export class TransactionsService {
 	/**
 	 * Отображает известные ошибки Prisma на HTTP-исключения Nest.
 	 * @param err - перехваченная ошибка
-	 * @returns `BadRequestException` при нарушении внешнего ключа (P2003), иначе исходная ошибка
+	 * @returns подходящее исключение Nest, иначе исходная ошибка
 	 */
 	private mapKnownError(err: unknown): unknown {
-		// P2003 — нарушение внешнего ключа (несуществующий categoryId)
-		if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2003') {
-			return new BadRequestException('Указанная категория не существует');
+		if (err instanceof Prisma.PrismaClientKnownRequestError) {
+			switch (err.code) {
+				case 'P2003': // внешний ключ: несуществующий categoryId
+					return new BadRequestException('Указанная категория не существует');
+				case 'P2025': // запись не найдена при update/delete
+					return new NotFoundException('Транзакция не найдена');
+			}
 		}
 		return err;
 	}

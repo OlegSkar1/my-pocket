@@ -1,4 +1,13 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsNumberString, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+	IsDateString,
+	IsEnum,
+	IsNotEmpty,
+	IsNumberString,
+	IsOptional,
+	IsString,
+	IsUUID,
+	MaxLength,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { TransactionType } from '@prisma/client';
 
@@ -45,7 +54,6 @@ export class UpdateTransactionDto {
 		description: 'UUID категории',
 	})
 	@IsOptional()
-	@IsString()
-	@IsNotEmpty()
+	@IsUUID('4')
 	categoryId?: string;
 }
